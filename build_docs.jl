@@ -7,6 +7,7 @@ pkg_path = dirname(@__FILE__)
 
 # Add the source directory to the load path
 push!(LOAD_PATH, pkg_path)
+push!(LOAD_PATH, joinpath(pkg_path, "src"))
 
 # Clean up the build directory if it exists
 build_dir = joinpath(pkg_path, "docs", "build")
@@ -18,12 +19,11 @@ end
 
 # Ensure the docs project environment is activated and packages are installed
 import Pkg
-Pkg.activate(pkg_path)
+Pkg.activate(joinpath(pkg_path, "docs"))
 Pkg.instantiate()
-#Pkg.activate(joinpath(pkg_path, "docs"))
 
 # Develop the main package from the current directory
-#Pkg.develop(path=pkg_path)
+Pkg.develop(path=pkg_path)
 
 # Try to load the package
 try
@@ -32,6 +32,7 @@ catch e
     @warn "Failed to load RobustGRAPE normally, trying direct include" exception=e
     # If loading fails, try to include the module directly
     include(joinpath(pkg_path, "src", "RobustGRAPE.jl"))
+    @eval using Main.RobustGRAPE
 end
 
 # Build the documentation
