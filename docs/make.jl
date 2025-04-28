@@ -17,12 +17,12 @@ makeinfo = (
     modules = [RobustGRAPE],
     format = Documenter.HTML(
         prettyurls = !isempty(get(ENV, "CI", "")),
-#        canonical = "https://USERNAME.github.io/RobustGRAPE.jl/stable/",
+        canonical = "https://srtweezer.github.io/RobustGRAPE.jl/stable/",
         assets = [],
         sidebar_sitename = false,
     ),
     sitename = "RobustGRAPE.jl",
-    authors = "Your Name",
+    authors = "Endres Lab",
     pages = [
         "Home" => "index.md",
         "User Guide" => [
@@ -38,16 +38,15 @@ makeinfo = (
         ],
         "Examples" => "examples.md",
     ],
-#    repo = "https://github.com/USERNAME/RobustGRAPE.jl/blob/{commit}{path}#L{line}",
-    remotes=nothing,
+    repo = "https://github.com/srtweezer/RobustGRAPE.jl/blob/{commit}{path}#L{line}",
     warnonly = true
 )
 
 Documenter.makedocs(; makeinfo...)
 
 # Uncomment this when ready to deploy to GitHub Pages
-# Documenter.deploydocs(
-#     repo = "github.com/USERNAME/RobustGRAPE.jl.git",
-#     devbranch = "main",
-#     push_preview = true,
-# )
+Documenter.deploydocs(
+    repo = "github.com/srtweezer/RobustGRAPE.jl.git",
+    devbranch = "main",
+    push_preview = true,
+)

@@ -1,5 +1,16 @@
 # Getting Started
 
+## Installation
+
+To install RobustGRAPE.jl, use the Julia package manager:
+
+```julia
+using Pkg
+Pkg.add("RobustGRAPE")  # From the Julia registry once published
+# OR
+Pkg.add(url="https://github.com/USERNAME/RobustGRAPE.jl")  # Directly from GitHub
+```
+
 ## Basic Usage
 
 Here's a simple example of using RobustGRAPE.jl to optimize a quantum gate:
@@ -80,6 +91,40 @@ final_fidelity, _, _, _ = calculate_fidelity_and_derivatives(fidelity_problem, o
 println("Final fidelity: ", final_fidelity)
 ```
 
+## Using the RydbergTools Module
+
+RobustGRAPE.jl includes a specialized submodule for working with Rydberg atom systems, which provides pre-defined Hamiltonians and quantum gates commonly used in Rydberg atom quantum computing:
+
+```julia
+using RobustGRAPE
+using RobustGRAPE.RydbergTools
+using LinearAlgebra
+
+# Access pre-defined Rydberg Hamiltonians
+H = rydberg_hamiltonian_symmetric_blockaded(π/2, 0, 0)
+
+# Create a CZ gate with a phase parameter
+θ = π/4
+cz_gate = cz_with_1q_phase_symmetric(θ)
+
+# Define a Hamiltonian function for GRAPE optimization
+function H0(t, ϕ, x_add)
+    # ϕ contains the control parameters (laser phase)
+    # x_add contains additional parameters
+    return rydberg_hamiltonian_symmetric_blockaded(ϕ[1], 0, 0)
+end
+
+# Now use this Hamiltonian in your GRAPE optimization
+# ...
+```
+
+The RydbergTools module includes functions for:
+- Hamiltonians in different Rydberg atom configurations (symmetric, blockaded, full)
+- Standard quantum gates like the CZ gate with phase parameters
+- Utility functions for phase handling (like unwrap_phase)
+
+See the [Rydberg Tools API](../api/rydberg.md) for complete documentation of these functions.
+
 ## Workflow
 
 The typical workflow with RobustGRAPE.jl involves:
@@ -87,6 +132,7 @@ The typical workflow with RobustGRAPE.jl involves:
 1. **Define the quantum system**
    - Specify Hamiltonian and dimension
    - Define error sources
+   - For Rydberg systems, use the RydbergTools module
 
 2. **Set up the optimization problem**
    - Create problem definition
@@ -100,7 +146,47 @@ The typical workflow with RobustGRAPE.jl involves:
 4. **Analyze results**
    - Calculate final fidelity
    - Analyze error robustness using `calculate_fidelity_response`
+   - For frequency domain analysis, use `calculate_fidelity_response_fft`
    - Visualize optimized control pulses
+
+## Example: Rydberg CZ Gate
+
+Here's a simplified example of optimizing a CZ gate in a Rydberg atom system:
+
+```julia
+using RobustGRAPE
+using RobustGRAPE.RydbergTools
+using LinearAlgebra
+using Optim
+using Random
+
+# Define system parameters
+ntimes = 200
+total_time = 5.0
+
+# Define Hamiltonian using RydbergTools
+H0(t, ϕ, x_add) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1], 0, 0)
+cz(x_add) = cz_with_1q_phase_symmetric(x_add[1])
+
+# Create optimization problem
+problem = FidelityRobustGRAPEProblem(
+    UnitaryRobustGRAPEProblem(
+        t0 = total_time,
+        ntimes = ntimes,
+        ndim = 5,  # Dimension of the Rydberg system
+        H0 = H0,
+        nb_additional_param = 1,
+        error_sources = []
+    ),
+    Diagonal([1, 2, 1, 0, 0]),  # Target state projection
+    cz  # Target CZ operation
+)
+
+# Run optimization (simplified)
+# ... 
+
+# For complete examples, see the Examples section
+```
 
 ## Next Steps
 
@@ -111,3 +197,5 @@ Explore the API documentation for more details on each component of RobustGRAPE.
 - [Fidelity Calculations](../api/fidelity.md): Fidelity metrics and optimization
 - [Regularization](../api/regularization.md): Pulse smoothing techniques
 - [Rydberg Tools](../api/rydberg.md): Rydberg atom specific functionality
+
+For complete working examples, check out the [Examples](../examples.md) page.
