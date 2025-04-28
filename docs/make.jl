@@ -17,6 +17,8 @@ makeinfo = (
     modules = [RobustGRAPE],
     format = Documenter.HTML(
         prettyurls = !isempty(get(ENV, "CI", "")),
+        edit_link="https://github.com/srtweezer/RobustGRAPE",
+        repolink="https://github.com/srtweezer/RobustGRAPE",
         canonical = "https://srtweezer.github.io/RobustGRAPE.jl/stable/",
         assets = [],
         sidebar_sitename = false,
@@ -38,15 +40,15 @@ makeinfo = (
         ],
         "Examples" => "examples.md",
     ],
-    repo = "https://github.com/srtweezer/RobustGRAPE.jl/blob/{commit}{path}#L{line}",
     warnonly = true
 )
 
 Documenter.makedocs(; makeinfo...)
 
-# Uncomment this when ready to deploy to GitHub Pages
+# Deploy documentation to GitHub Pages
 Documenter.deploydocs(
     repo = "github.com/srtweezer/RobustGRAPE.jl.git",
     devbranch = "main",
+    target = "build",
     push_preview = true,
 )

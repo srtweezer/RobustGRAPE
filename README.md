@@ -78,7 +78,7 @@ result = optimize_fidelity_and_error_sources(problem, params)
 
 ## Documentation
 
-For more information, see the documentation at [DOCUMENTATION_URL].
+For more information, see the [online documentation](https://srtweezer.github.io/RobustGRAPE.jl/stable/).
 
 ## License
 

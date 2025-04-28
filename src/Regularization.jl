@@ -82,6 +82,32 @@ function regularization_cost(x::Vector{<:Real}, f::Function, df::Function)
     return reg1, df_x .* jac1, reg2, df_x .* jac2
 end
 
+"""
+    regularization_cost_phase(ϕs::Vector{<:Real})
+
+Compute regularization costs and their gradients for phase-based control parameters.
+
+This function calculates regularization terms for both sine and cosine of the phase values,
+which promotes smoothness in the complex phasor representation of the phase controls.
+This is particularly useful when optimizing phase-based control sequences where the physical
+meaning depends on the periodic nature of phases.
+
+# Arguments
+- `ϕs::Vector{<:Real}`: The vector of phase values (in radians) to regularize
+
+# Returns
+A tuple with four elements:
+- `reg1::Real`: First-order regularization cost (sum of cos and sin components)
+- `jac1::Vector{<:Real}`: Gradient of the first-order regularization with respect to `ϕs`
+- `reg2::Real`: Second-order regularization cost (sum of cos and sin components)
+- `jac2::Vector{<:Real}`: Gradient of the second-order regularization with respect to `ϕs`
+
+# Examples
+```julia
+ϕs = [0.0, 0.1, 0.3, 0.2, 0.1]
+reg1, jac1, reg2, jac2 = regularization_cost_phase(ϕs)
+```
+"""
 function regularization_cost_phase(ϕs::Vector{<:Real})
     reg1_cos, jac1_cos, reg2_cos, jac2_cos = regularization_cost(ϕs, x-> cos(x), x-> -sin(x))
     reg1_sin, jac1_sin, reg2_sin, jac2_sin = regularization_cost(ϕs, x-> sin(x), x-> cos(x))
