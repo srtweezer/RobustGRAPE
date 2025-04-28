@@ -27,6 +27,7 @@ Alternatively, you can build the documentation manually with the following steps
    include("docs/make.jl")
    ```
 
+
 ## Viewing the Documentation
 
 After building, you can view the documentation by opening `docs/build/index.html` in your web browser.
