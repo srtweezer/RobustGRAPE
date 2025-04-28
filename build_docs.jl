@@ -7,7 +7,6 @@ pkg_path = dirname(@__FILE__)
 
 # Add the source directory to the load path
 push!(LOAD_PATH, pkg_path)
-push!(LOAD_PATH, joinpath(pkg_path, "src"))
 
 # Clean up the build directory if it exists
 build_dir = joinpath(pkg_path, "docs", "build")
@@ -19,11 +18,11 @@ end
 
 # Ensure the docs project environment is activated and packages are installed
 import Pkg
-Pkg.activate(joinpath(pkg_path, "docs"))
+Pkg.activate(pkg_path)
 Pkg.instantiate()
 
 # Develop the main package from the current directory
-Pkg.develop(path=pkg_path)
+#Pkg.develop(path=pkg_path)
 
 # Try to load the package
 try
