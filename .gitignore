@@ -1,0 +1,47 @@
+# Julia specific
+*.jl.cov
+*.jl.*.cov
+*.jl.mem
+*.jl.*.mem
+deps/deps.jl
+docs/build/
+docs/site/
+Manifest.toml
+!Project.toml
+
+# Julia package manager
+.julia/
+
+# Build artifacts
+*.o
+*.so
+*.dll
+*.dylib
+
+# Generated documentation
+/docs/build/
+
+# Local development files
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*~
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Output files
+*.pdf
+*.png
+*.svg
+*.gif
+*.log
+*.csv
+*.dat
+*.bin
+*.mat
+
+# Cache files 
+.cache/
+__pycache__/
