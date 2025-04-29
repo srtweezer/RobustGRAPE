@@ -19,7 +19,7 @@ makeinfo = (
         prettyurls = !isempty(get(ENV, "CI", "")),
         edit_link="https://github.com/srtweezer/RobustGRAPE",
         repolink="https://github.com/srtweezer/RobustGRAPE",
-        canonical = "https://srtweezer.github.io/RobustGRAPE.jl/stable/",
+        canonical = "https://srtweezer.github.io/RobustGRAPE/",
         assets = [],
         sidebar_sitename = false,
     ),
@@ -47,7 +47,7 @@ Documenter.makedocs(; makeinfo...)
 
 # Deploy documentation to GitHub Pages
 Documenter.deploydocs(
-    repo = "github.com/srtweezer/RobustGRAPE.jl.git",
+    repo = "github.com/srtweezer/RobustGRAPE.git",
     devbranch = "main",
     target = "build",
     push_preview = true,
