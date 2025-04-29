@@ -1,59 +1,77 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Examples · RobustGRAPE.jl</title><meta name="title" content="Examples · RobustGRAPE.jl"/><meta property="og:title" content="Examples · RobustGRAPE.jl"/><meta property="twitter:title" content="Examples · RobustGRAPE.jl"/><meta name="description" content="Documentation for RobustGRAPE.jl."/><meta property="og:description" content="Documentation for RobustGRAPE.jl."/><meta property="twitter:description" content="Documentation for RobustGRAPE.jl."/><meta property="og:url" content="https://srtweezer.github.io/RobustGRAPE.jl/stable/examples/"/><meta property="twitter:url" content="https://srtweezer.github.io/RobustGRAPE.jl/stable/examples/"/><link rel="canonical" href="https://srtweezer.github.io/RobustGRAPE.jl/stable/examples/"/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><span class="tocitem">User Guide</span><ul><li><a class="tocitem" href="../guide/introduction/">Introduction</a></li><li><a class="tocitem" href="../guide/getting-started/">Getting Started</a></li></ul></li><li><span class="tocitem">API Reference</span><ul><li><a class="tocitem" href="../api/types/">Types</a></li><li><a class="tocitem" href="../api/unitary/">Unitary Calculations</a></li><li><a class="tocitem" href="../api/fidelity/">Fidelity Calculations</a></li><li><a class="tocitem" href="../api/regularization/">Regularization</a></li><li><a class="tocitem" href="../api/rydberg/">Rydberg Tools</a></li></ul></li><li class="is-active"><a class="tocitem" href>Examples</a><ul class="internal"><li><a class="tocitem" href="#Time-Optimal-CZ-Gate"><span>Time-Optimal CZ Gate</span></a></li><li><a class="tocitem" href="#Robust-Control-Pulse-Design"><span>Robust Control Pulse Design</span></a></li><li><a class="tocitem" href="#Frequency-Domain-Analysis"><span>Frequency Domain Analysis</span></a></li><li><a class="tocitem" href="#Additional-Analysis:-Rydberg-Population"><span>Additional Analysis: Rydberg Population</span></a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Examples</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Examples</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/srtweezer/RobustGRAPE" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/srtweezer/RobustGRAPE/blob/https://github.com/srtweezer/RobustGRAPE/docs/src/examples.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Examples"><a class="docs-heading-anchor" href="#Examples">Examples</a><a id="Examples-1"></a><a class="docs-heading-anchor-permalink" href="#Examples" title="Permalink"></a></h1><h2 id="Time-Optimal-CZ-Gate"><a class="docs-heading-anchor" href="#Time-Optimal-CZ-Gate">Time-Optimal CZ Gate</a><a id="Time-Optimal-CZ-Gate-1"></a><a class="docs-heading-anchor-permalink" href="#Time-Optimal-CZ-Gate" title="Permalink"></a></h2><p>This example shows how to optimize a CZ gate in a Rydberg atom system with minimal gate time.</p><pre><code class="language-julia hljs">using RobustGRAPE
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Examples · RobustGRAPE.jl</title><meta name="title" content="Examples · RobustGRAPE.jl"/><meta property="og:title" content="Examples · RobustGRAPE.jl"/><meta property="twitter:title" content="Examples · RobustGRAPE.jl"/><meta name="description" content="Documentation for RobustGRAPE.jl."/><meta property="og:description" content="Documentation for RobustGRAPE.jl."/><meta property="twitter:description" content="Documentation for RobustGRAPE.jl."/><meta property="og:url" content="https://srtweezer.github.io/RobustGRAPE/examples/"/><meta property="twitter:url" content="https://srtweezer.github.io/RobustGRAPE/examples/"/><link rel="canonical" href="https://srtweezer.github.io/RobustGRAPE/examples/"/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><span class="tocitem">User Guide</span><ul><li><a class="tocitem" href="../guide/introduction/">Introduction</a></li><li><a class="tocitem" href="../guide/getting-started/">Getting Started</a></li></ul></li><li><span class="tocitem">API Reference</span><ul><li><a class="tocitem" href="../api/types/">Types</a></li><li><a class="tocitem" href="../api/unitary/">Unitary Calculations</a></li><li><a class="tocitem" href="../api/fidelity/">Fidelity Calculations</a></li><li><a class="tocitem" href="../api/regularization/">Regularization</a></li><li><a class="tocitem" href="../api/rydberg/">Rydberg Tools</a></li></ul></li><li class="is-active"><a class="tocitem" href>Examples</a><ul class="internal"><li><a class="tocitem" href="#Time-Optimal-CZ-Gate"><span>Time-Optimal CZ Gate</span></a></li><li><a class="tocitem" href="#Robust-Control-Pulse-Design"><span>Robust Control Pulse Design</span></a></li><li><a class="tocitem" href="#Frequency-Domain-Analysis"><span>Frequency Domain Analysis</span></a></li><li><a class="tocitem" href="#Additional-Analysis:-Rydberg-Population"><span>Additional Analysis: Rydberg Population</span></a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Examples</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Examples</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/srtweezer/RobustGRAPE" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/srtweezer/RobustGRAPE/blob/https://github.com/srtweezer/RobustGRAPE/docs/src/examples.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Examples"><a class="docs-heading-anchor" href="#Examples">Examples</a><a id="Examples-1"></a><a class="docs-heading-anchor-permalink" href="#Examples" title="Permalink"></a></h1><h2 id="Time-Optimal-CZ-Gate"><a class="docs-heading-anchor" href="#Time-Optimal-CZ-Gate">Time-Optimal CZ Gate</a><a id="Time-Optimal-CZ-Gate-1"></a><a class="docs-heading-anchor-permalink" href="#Time-Optimal-CZ-Gate" title="Permalink"></a></h2><p>This example demonstrates how to optimize a CZ gate in a Rydberg atom system with minimal gate time. The optimization is based on the GRAPE algorithm which divides the control pulse into discrete time steps and optimizes the control parameters at each step.</p><h3 id="Problem-Setup-and-Optimization"><a class="docs-heading-anchor" href="#Problem-Setup-and-Optimization">Problem Setup and Optimization</a><a id="Problem-Setup-and-Optimization-1"></a><a class="docs-heading-anchor-permalink" href="#Problem-Setup-and-Optimization" title="Permalink"></a></h3><p>First, we import the necessary packages and set up the problem:</p><pre><code class="language-julia hljs">using RobustGRAPE
 using RobustGRAPE.RydbergTools
 using LinearAlgebra
 using Optim
 using Random
+using Setfield
 
 # Set random seed for reproducibility
 Random.seed!(43)
 
-# Define parameters
+# Define optimization parameters
 ntimes = 500  # Number of time steps
 t0 = 7.613    # Total evolution time (in units of 1/Ω)
 
 # Define Hamiltonian and target operation
+# Hamiltonian function takes time t, control parameter ϕ and additional parameters
 H0(t, ϕ, x_add) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1], 0, 0)
-cz(x_add) = cz_with_1q_phase_symmetric(x_add[1])
 
-# Create the optimization problem
+# Target operation (CZ gate) with an additional phase parameter
+cz(x_add) = cz_with_1q_phase_symmetric(x_add[1])</code></pre><p>Here, <code>rydberg_hamiltonian_symmetric_blockaded</code> represents the Hamiltonian of a Rydberg atom system in a blockade configuration. The function takes the laser phase <code>ϕ[1]</code> as its first argument, with additional parameters for intensity and detuning errors (set to 0 here).</p><p>Next, we create the optimization problem:</p><pre><code class="language-julia hljs"># Create the optimization problem
 rydberg_problem = FidelityRobustGRAPEProblem(
     UnitaryRobustGRAPEProblem(
-        t0=t0,
-        ntimes=ntimes,
-        ndim=5,
-        H0=H0,
-        nb_additional_param=1,
-        error_sources=[]
+        t0=t0,             # Total evolution time
+        ntimes=ntimes,     # Number of time steps
+        ndim=5,            # Dimension of the Hilbert space (5 for the Rydberg system)
+        H0=H0,             # Hamiltonian function
+        nb_additional_param=1,  # One additional parameter (phase)
+        error_sources=[]   # No error sources for basic optimization
     ),
-    Diagonal([1, 2, 1, 0, 0]),  # Target state projection
+    Diagonal([1, 2, 1, 0, 0]),  # Target state projection (computational subspace)
     cz                          # Target operation
-)
-
-# Configure optimization parameters
+)</code></pre><p>The problem setup involves:</p><ul><li>A <code>UnitaryRobustGRAPEProblem</code> that defines the physical system and dynamics</li><li>A <code>FidelityRobustGRAPEProblem</code> that adds the target operation and subspace projection</li><li>The projection <code>Diagonal([1, 2, 1, 0, 0])</code> restricts the optimization to the computational subspace</li></ul><p>Now we configure the optimization parameters:</p><pre><code class="language-julia hljs"># Configure optimization parameters
 rydberg_cz_parameters = FidelityRobustGRAPEParameters(
-    x_initial = [2*π*0.001*rand(ntimes); 2*π*rand()],  # Initial pulse + phase parameter
+    # Initial control pulse: small random values for the time steps + random phase
+    x_initial = [2*π*0.001*rand(ntimes); 2*π*rand()],
+    
+    # Use phase regularization to ensure smooth pulses
     regularization_functions = [regularization_cost_phase],
-    regularization_coeff1=[1e-7],
-    regularization_coeff2=[1e-7],
-    error_source_coeff=Vector{Real}(),
-    time_limit=40,
+    regularization_coeff1=[1e-7],  # First derivative regularization weight
+    regularization_coeff2=[1e-7],  # Second derivative regularization weight
+    
+    error_source_coeff=Vector{Real}(),  # No error sources yet
+    time_limit=40,  # Maximum optimization time in seconds
+    
+    # Additional parameters for the optimizer
     additional_parameters = Dict(
-        :show_trace =&gt; true,
-        :show_every =&gt; 10,
-        :g_tol =&gt; 1e-9
+        :show_trace =&gt; true,    # Show optimization progress
+        :show_every =&gt; 10,      # Display every 10 iterations
+        :g_tol =&gt; 1e-9          # Gradient tolerance for convergence
     )
-)
-
-# Run optimization
+)</code></pre><p>The <code>regularization_cost_phase</code> function is particularly important for phase-based control, as it ensures smooth transitions in the phase values, which is crucial for experimental implementation.</p><p>Finally, we run the optimization:</p><pre><code class="language-julia hljs"># Run optimization
 res_optim_cz = optimize_fidelity_and_error_sources(rydberg_problem, rydberg_cz_parameters)
 
 # Extract optimized pulse
-optim_pulse = Optim.minimizer(res_optim_cz)</code></pre><h2 id="Robust-Control-Pulse-Design"><a class="docs-heading-anchor" href="#Robust-Control-Pulse-Design">Robust Control Pulse Design</a><a id="Robust-Control-Pulse-Design-1"></a><a class="docs-heading-anchor-permalink" href="#Robust-Control-Pulse-Design" title="Permalink"></a></h2><p>This example demonstrates designing control pulses that are robust against specific noise sources like intensity and frequency errors.</p><pre><code class="language-julia hljs"># Define error Hamiltonians
-H_intensity_error(t, ϕ, x_add, ϵ) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1], ϵ, 0) - H0(t, ϕ, x_add)
-H_frequency_error(t, ϕ, x_add, δ) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1], 0, δ) - H0(t, ϕ, x_add)
+optim_pulse = Optim.minimizer(res_optim_cz)
 
-# Create a GRAPE problem with error sources
+# Evaluate the final fidelity
+final_fidelity, _, _, _ = calculate_fidelity_and_derivatives(rydberg_problem, optim_pulse)
+println(&quot;Final fidelity: $(final_fidelity)&quot;)</code></pre><h3 id="Visualizing-the-Optimized-Pulse"><a class="docs-heading-anchor" href="#Visualizing-the-Optimized-Pulse">Visualizing the Optimized Pulse</a><a id="Visualizing-the-Optimized-Pulse-1"></a><a class="docs-heading-anchor-permalink" href="#Visualizing-the-Optimized-Pulse" title="Permalink"></a></h3><p>We can visualize the optimized pulse using PyPlot:</p><pre><code class="language-julia hljs">using PyPlot
+
+# Plot the phase profile
+fig, ax = subplots()
+# Use unwrap_phase to ensure smooth phase representation
+ax.plot((1:ntimes) / ntimes * t0, unwrap_phase(optim_pulse[1:ntimes]))
+ax.set_title(&quot;Time-optimal Rydberg pulse&quot;)
+ax.set_xlabel(&quot;Time (1/Ω)&quot;)
+ax.set_ylabel(&quot;Laser phase (rad)&quot;)</code></pre><h2 id="Robust-Control-Pulse-Design"><a class="docs-heading-anchor" href="#Robust-Control-Pulse-Design">Robust Control Pulse Design</a><a id="Robust-Control-Pulse-Design-1"></a><a class="docs-heading-anchor-permalink" href="#Robust-Control-Pulse-Design" title="Permalink"></a></h2><p>A key feature of RobustGRAPE is the ability to analyze and optimize control pulses for robustness against various sources of noise and experimental imperfections. This example demonstrates how to evaluate the sensitivity of an optimized quantum gate to common error sources.</p><h3 id="Defining-Error-Hamiltonians"><a class="docs-heading-anchor" href="#Defining-Error-Hamiltonians">Defining Error Hamiltonians</a><a id="Defining-Error-Hamiltonians-1"></a><a class="docs-heading-anchor-permalink" href="#Defining-Error-Hamiltonians" title="Permalink"></a></h3><p>First, we need to define how different error sources affect our system Hamiltonian:</p><pre><code class="language-julia hljs"># Define error Hamiltonians as deviations from the ideal Hamiltonian
+
+# Intensity error: variation in the Rabi frequency (laser power)
+H_intensity_error(t, ϕ, x_add, ϵ) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1], ϵ, 0) - H0(t, ϕ, x_add)
+
+# Frequency error: variation in the laser detuning
+H_frequency_error(t, ϕ, x_add, δ) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1], 0, δ) - H0(t, ϕ, x_add)</code></pre><p>Each error Hamiltonian represents how the system dynamics change when a specific parameter deviates from its nominal value:</p><ul><li>The intensity error (ϵ) represents fluctuations in the laser power or coupling strength</li><li>The frequency error (δ) represents fluctuations in the laser frequency or detuning</li></ul><h3 id="Creating-a-Problem-with-Error-Sources"><a class="docs-heading-anchor" href="#Creating-a-Problem-with-Error-Sources">Creating a Problem with Error Sources</a><a id="Creating-a-Problem-with-Error-Sources-1"></a><a class="docs-heading-anchor-permalink" href="#Creating-a-Problem-with-Error-Sources" title="Permalink"></a></h3><p>Next, we create a problem definition that includes these error sources:</p><pre><code class="language-julia hljs"># Create a GRAPE problem with error sources
 rydberg_problem_with_errors = FidelityRobustGRAPEProblem(
     UnitaryRobustGRAPEProblem(
         t0=t0,
@@ -62,52 +80,89 @@ rydberg_problem_with_errors = FidelityRobustGRAPEProblem(
         H0=H0,
         nb_additional_param=1,
         error_sources=[
-            ErrorSource(H_intensity_error),
-            ErrorSource(H_frequency_error)
+            ErrorSource(H_intensity_error),  # First error source: intensity fluctuations
+            ErrorSource(H_frequency_error)   # Second error source: frequency fluctuations
         ]
     ),
-    Diagonal([1, 2, 1, 0, 0]),
-    cz
-)
-
-# Analyze sensitivity to errors with previously optimized pulse
+    Diagonal([1, 2, 1, 0, 0]),  # Target state projection
+    cz                          # Target operation
+)</code></pre><h3 id="Analyzing-Error-Sensitivity"><a class="docs-heading-anchor" href="#Analyzing-Error-Sensitivity">Analyzing Error Sensitivity</a><a id="Analyzing-Error-Sensitivity-1"></a><a class="docs-heading-anchor-permalink" href="#Analyzing-Error-Sensitivity" title="Permalink"></a></h3><p>Now we can analyze how sensitive our previously optimized pulse is to these error sources:</p><pre><code class="language-julia hljs"># Analyze sensitivity to errors with previously optimized pulse
 F, _, F_d2err, _ = calculate_fidelity_and_derivatives(rydberg_problem_with_errors, optim_pulse)
+
+# The F_d2err vector contains the second derivatives of fidelity with respect to error parameters
+# These values tell us how quickly the fidelity decreases with small errors
 
 println(&quot;Infidelity: $(1-F)&quot;)
 println(&quot;Sensitivity to intensity errors: F = 1 - $(-F_d2err[1]/2) × ϵ²&quot;)
-println(&quot;Sensitivity to frequency errors: F = 1 - $(-F_d2err[2]/2) × δ²&quot;)</code></pre><h2 id="Frequency-Domain-Analysis"><a class="docs-heading-anchor" href="#Frequency-Domain-Analysis">Frequency Domain Analysis</a><a id="Frequency-Domain-Analysis-1"></a><a class="docs-heading-anchor-permalink" href="#Frequency-Domain-Analysis" title="Permalink"></a></h2><p>This example shows how to analyze the frequency response of optimized control pulses to understand their robustness characteristics.</p><pre><code class="language-julia hljs"># Calculate frequency response with oversampling for better resolution
+println(&quot;Sensitivity to frequency errors: F = 1 - $(-F_d2err[2]/2) × δ²&quot;)</code></pre><p>For small errors, the infidelity (1-F) scales quadratically with the error amplitude. The coefficients <code>-F_d2err[i]/2</code> indicate how sensitive the gate is to each error source - smaller values mean greater robustness.</p><h3 id="Designing-Robust-Pulses"><a class="docs-heading-anchor" href="#Designing-Robust-Pulses">Designing Robust Pulses</a><a id="Designing-Robust-Pulses-1"></a><a class="docs-heading-anchor-permalink" href="#Designing-Robust-Pulses" title="Permalink"></a></h3><p>To optimize for robustness, we can include error sensitivity in the optimization objective:</p><pre><code class="language-julia hljs"># Create parameters for robust optimization
+robust_parameters = FidelityRobustGRAPEParameters(
+    x_initial = optim_pulse,  # Start from previously optimized pulse
+    regularization_functions = [regularization_cost_phase],
+    regularization_coeff1=[1e-7],
+    regularization_coeff2=[1e-7],
+    error_source_coeff=[0.5, 0.5],  # Non-zero weights for error sensitivities
+    time_limit=60,
+    additional_parameters = Dict(
+        :show_trace =&gt; true,
+        :show_every =&gt; 10,
+        :g_tol =&gt; 1e-9
+    )
+)
+
+# Run robust optimization
+# res_robust = optimize_fidelity_and_error_sources(rydberg_problem_with_errors, robust_parameters)</code></pre><p>Setting non-zero <code>error_source_coeff</code> values instructs the optimizer to minimize both the gate infidelity and the sensitivity to errors, creating a control pulse that maintains high fidelity even in the presence of experimental imperfections.</p><h2 id="Frequency-Domain-Analysis"><a class="docs-heading-anchor" href="#Frequency-Domain-Analysis">Frequency Domain Analysis</a><a id="Frequency-Domain-Analysis-1"></a><a class="docs-heading-anchor-permalink" href="#Frequency-Domain-Analysis" title="Permalink"></a></h2><p>RobustGRAPE provides powerful tools for analyzing the frequency-dependent response of quantum gates to noise. This frequency domain analysis is crucial for understanding how a gate responds to noise at different timescales, which can inform both gate design and experimental implementation.</p><h3 id="Computing-the-Frequency-Response"><a class="docs-heading-anchor" href="#Computing-the-Frequency-Response">Computing the Frequency Response</a><a id="Computing-the-Frequency-Response-1"></a><a class="docs-heading-anchor-permalink" href="#Computing-the-Frequency-Response" title="Permalink"></a></h3><p>The frequency response calculation transforms the time-dependent sensitivity of a quantum gate into the frequency domain:</p><pre><code class="language-julia hljs"># Calculate frequency response with oversampling for better resolution
 response_fct, frequencies = calculate_fidelity_response_fft(
     rydberg_problem_with_errors, 
     optim_pulse; 
-    oversampling=30
+    oversampling=30  # Higher values provide smoother frequency resolution
 )
 
 # Verify that DC component matches our direct calculation
+# The DC component (zero frequency) corresponds to static parameter shifts
 @assert isapprox(-F_d2err[1], 2*response_fct[1,1], rtol=1e-3, atol=1e-3)
-@assert isapprox(-F_d2err[2], 2*response_fct[1,2], rtol=1e-3, atol=1e-3)
-
-# Plot the response to intensity noise (example plotting with PyPlot)
-using PyPlot
+@assert isapprox(-F_d2err[2], 2*response_fct[1,2], rtol=1e-3, atol=1e-3)</code></pre><p>The <code>calculate_fidelity_response_fft</code> function computes how the gate fidelity responds to time-dependent noise at different frequencies. The returned matrices contain:</p><ul><li><code>response_fct</code>: A matrix where each column corresponds to an error source, and each row to a frequency</li><li><code>frequencies</code>: The corresponding frequency values (in units of Ω/2π)</li></ul><h3 id="Visualizing-the-Intensity-Noise-Response"><a class="docs-heading-anchor" href="#Visualizing-the-Intensity-Noise-Response">Visualizing the Intensity Noise Response</a><a id="Visualizing-the-Intensity-Noise-Response-1"></a><a class="docs-heading-anchor-permalink" href="#Visualizing-the-Intensity-Noise-Response" title="Permalink"></a></h3><p>Let&#39;s plot the response to intensity noise:</p><pre><code class="language-julia hljs">using PyPlot
 fig, ax = subplots()
 ax.plot(frequencies, 0.25 * response_fct[:,1])
 ax.set_xlim(0, 3)
 ax.set_ylim(0, 1.5)
 ax.set_xlabel(&quot;2πf/Ω&quot;)
 ax.set_ylabel(&quot;Laser intensity noise fidelity response&quot;)
-ax.set_title(&quot;Time-optimal gate&quot;)
-
-# Plot the response to frequency noise
-fig, ax = subplots()
+ax.set_title(&quot;Time-optimal gate response to intensity noise&quot;)</code></pre><p>This plot shows how sensitive the gate is to intensity fluctuations at different frequencies. Key insights:</p><ul><li>Higher values indicate greater sensitivity to noise at that frequency</li><li>The DC component (f=0) corresponds to static offsets in laser intensity</li><li>The frequency axis is normalized to the Rabi frequency (Ω)</li><li>Peaks in the response indicate frequencies where the gate is particularly vulnerable to noise</li></ul><h3 id="Visualizing-the-Frequency-Noise-Response"><a class="docs-heading-anchor" href="#Visualizing-the-Frequency-Noise-Response">Visualizing the Frequency Noise Response</a><a id="Visualizing-the-Frequency-Noise-Response-1"></a><a class="docs-heading-anchor-permalink" href="#Visualizing-the-Frequency-Noise-Response" title="Permalink"></a></h3><p>Similarly, we can plot the response to laser frequency noise:</p><pre><code class="language-julia hljs">fig, ax = subplots()
 ax.plot(frequencies, (2*π)^2 * response_fct[:,2])
 ax.set_xlim(0, 3)
 ax.set_ylim(0, 250)
 ax.set_xlabel(&quot;2πf/Ω&quot;)
 ax.set_ylabel(&quot;Laser frequency noise fidelity response&quot;)
-ax.set_title(&quot;Time-optimal gate&quot;)</code></pre><h2 id="Additional-Analysis:-Rydberg-Population"><a class="docs-heading-anchor" href="#Additional-Analysis:-Rydberg-Population">Additional Analysis: Rydberg Population</a><a id="Additional-Analysis:-Rydberg-Population-1"></a><a class="docs-heading-anchor-permalink" href="#Additional-Analysis:-Rydberg-Population" title="Permalink"></a></h2><p>You can also analyze other properties of the optimized pulse:</p><pre><code class="language-julia hljs"># Calculate Rydberg state population during gate execution
+ax.set_title(&quot;Time-optimal gate response to frequency noise&quot;)</code></pre><p>The scaling factor <code>(2*π)^2</code> adjusts the response to represent the sensitivity to frequency fluctuations in standard units, where the detuning is measured in radians/second.</p><h3 id="Applications-of-Frequency-Analysis"><a class="docs-heading-anchor" href="#Applications-of-Frequency-Analysis">Applications of Frequency Analysis</a><a id="Applications-of-Frequency-Analysis-1"></a><a class="docs-heading-anchor-permalink" href="#Applications-of-Frequency-Analysis" title="Permalink"></a></h3><p>Frequency response analysis has several important applications:</p><ol><li><strong>Filter Design</strong>: Design filters to suppress noise at frequencies where the gate is most sensitive</li><li><strong>Pulse Optimization</strong>: Modify control pulses to reduce sensitivity at problematic frequencies</li><li><strong>Error Budgeting</strong>: Allocate error budget across different noise sources based on their impact</li><li><strong>Hardware Requirements</strong>: Determine spectral noise requirements for experimental equipment</li></ol><h2 id="Additional-Analysis:-Rydberg-Population"><a class="docs-heading-anchor" href="#Additional-Analysis:-Rydberg-Population">Additional Analysis: Rydberg Population</a><a id="Additional-Analysis:-Rydberg-Population-1"></a><a class="docs-heading-anchor-permalink" href="#Additional-Analysis:-Rydberg-Population" title="Permalink"></a></h2><p>Beyond fidelity and error sensitivity, RobustGRAPE allows you to analyze other important properties of quantum control pulses. For Rydberg atom systems, one crucial metric is the total time spent in the Rydberg state, as these states are susceptible to decoherence and decay.</p><h3 id="Measuring-Rydberg-State-Population"><a class="docs-heading-anchor" href="#Measuring-Rydberg-State-Population">Measuring Rydberg State Population</a><a id="Measuring-Rydberg-State-Population-1"></a><a class="docs-heading-anchor-permalink" href="#Measuring-Rydberg-State-Population" title="Permalink"></a></h3><p>We can calculate the integrated Rydberg state population during gate execution:</p><pre><code class="language-julia hljs"># Create a specialized problem for measuring Rydberg population
 rydberg_problem_with_decay = deepcopy(rydberg_problem_with_errors)
+
+# Define an operator that detects population in Rydberg states
+# The [0,0,0,1,1] pattern targets the Rydberg states in our 5-level system
 decay_operator(t, x, x_add, ϵ) = ϵ*collect(Diagonal([0, 0, 0, 1, 1]))
+
+# Update the problem to use this detection operator
 rydberg_problem_with_decay = (@set rydberg_problem_with_decay.unitary_problem.error_sources = [
     ErrorSource(decay_operator)
 ])
-rydberg_pop = calculate_expectation_values(rydberg_problem_with_decay, optim_pulse)[end, 1]
-println(&quot;Integrated Rydberg population: $(rydberg_pop)/Ω&quot;)</code></pre><p>For complete examples, see the <code>examples/</code> directory in the package repository.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../api/rydberg/">« Rydberg Tools</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.10.2 on <span class="colophon-date" title="Monday 28 April 2025 22:43">Monday 28 April 2025</span>. Using Julia version 1.9.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+
+# Calculate expectation values throughout the gate evolution
+# The result is a matrix of values for each time step and each error source
+rydberg_pops = calculate_expectation_values(rydberg_problem_with_decay, optim_pulse)
+
+# Extract the final integrated Rydberg population (first error source, end of evolution)
+rydberg_pop = rydberg_pops[end, 1]
+println(&quot;Integrated Rydberg population: $(rydberg_pop)/Ω&quot;)</code></pre><p>The integrated Rydberg population is a dimensionless quantity that, when multiplied by the decay rate, gives the total probability of decay during the gate operation. Lower values indicate a more resilient gate against decoherence.</p><h3 id="Visualizing-State-Evolution"><a class="docs-heading-anchor" href="#Visualizing-State-Evolution">Visualizing State Evolution</a><a id="Visualizing-State-Evolution-1"></a><a class="docs-heading-anchor-permalink" href="#Visualizing-State-Evolution" title="Permalink"></a></h3><p>You can also visualize how different states evolve during the gate operation:</p><pre><code class="language-julia hljs"># Calculate state evolution at multiple time points
+time_points = LinRange(0, t0, 100)
+state_evolution = calculate_state_evolution(rydberg_problem, optim_pulse, time_points)
+
+# Plot Rydberg state population vs time for an initial state
+initial_state = [1, 0, 0, 0, 0]  # Example: starting in |00⟩ state
+populations = [abs2(state_evolution[i,4,1]) + abs2(state_evolution[i,5,1]) for i in 1:length(time_points)]
+
+# Plot the result
+using PyPlot
+fig, ax = subplots()
+ax.plot(time_points, populations)
+ax.set_xlabel(&quot;Time (1/Ω)&quot;)
+ax.set_ylabel(&quot;Rydberg state population&quot;)
+ax.set_title(&quot;Rydberg population during gate execution&quot;)</code></pre><p>By analyzing and optimizing these additional properties, you can design quantum gates that not only achieve high fidelity but are also robust against practical experimental constraints like decoherence and decay.</p><p>For complete working examples, see the <code>examples/</code> directory in the package repository.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../api/rydberg/">« Rydberg Tools</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.10.2 on <span class="colophon-date" title="Tuesday 29 April 2025 00:14">Tuesday 29 April 2025</span>. Using Julia version 1.9.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
