@@ -77,7 +77,7 @@ cz(x_add) = cz_with_1q_phase_symmetric(x_add[1])
 
 Here, `rydberg_hamiltonian_symmetric_blockaded` represents the above Hamiltonian. We set the intensity and detuning errors (respectively, ``\epsilon`` and ``\delta``) to zero.
 
-To define our robust GRAPE problem, we also need to set a (pseudo)-projector, which is used to define the computational subspace on which the average fidelity is averaged. It needs to be a diagonal matrix. The algorithm will decompose this projector into ``P = P_0 \times W`` where ``P_0`` is the projector with only ones and zeros on the diagonal, and ``W`` is a diagonal matrix that will be used to weight the trace: ``A \mapsto tr(W A)``. This is relevant for systems with symmetries such that the fidelity has to be averaged with weighting specific states to account for the symmetry. For instance, in the Rydberg example we're considering, we consider a simplified Hilbert space ``|00\rangle, |01\rangle, |11\rangle, |0r\rangle, |W\rangle``. Therefore the effective trace needs to account twice for the ``|01\rangle`` state. Hence we define the pseudo-projector:
+To define our robust GRAPE problem, we also need to set a (pseudo)-projector, which is used to define the computational subspace on which the average fidelity is averaged. It needs to be a diagonal matrix. The algorithm will decompose this projector into ``P = P_0 \times W`` where ``P_0`` is the projector with only ones and zeros on the diagonal, and ``W`` is a diagonal matrix that will be used to weight the trace: ``A \mapsto tr(W A)``. This is relevant for systems with symmetries such that the fidelity has to be averaged with weighting specific states to account for the symmetry. For instance, in the Rydberg example we're considering, we utilize a simplified Hilbert space ``|00\rangle, |01\rangle, |11\rangle, |0r\rangle, |W\rangle``. Therefore the effective trace needs to account twice for the ``|01\rangle`` state. Hence we define the pseudo-projector:
 
 ```math
 P = \mathrm{diag}(1,2,1,0,0)
@@ -94,14 +94,14 @@ rydberg_problem = FidelityRobustGRAPEProblem(
         ndim=5,            # Dimension of the Hilbert space (5 for the Rydberg system)
         H0=H0,             # Hamiltonian function
         nb_additional_param=1,  # One additional parameter (phase)
-        error_sources=[]   # No error sources for basic optimization
+        error_sources=[]   # No error sources for now
     ),
     collect(Diagonal([1, 2, 1, 0, 0])),  # Target state projection (computational subspace)
     cz                          # Target operation
 )
 ```
 
-Then we can define our optimization problem. Note that it would be relatively straightforward to directly use the interface we just created with the `calculate_fidelity_and_derivatives` to find the time-optimal gate. Nevertheless, the package offers a higher-level interface to perform this optimization more conveniently.
+Then we can define our optimization problem. Note that it would be relatively straightforward to directly use the interface we just created with the `calculate_fidelity_and_derivatives` function to find the time-optimal gate. Nevertheless, the package offers a higher-level interface to perform this optimization more conveniently.
 
 This interface minimizes a cost function:
 
@@ -113,7 +113,7 @@ where ``F`` is the average gate fidelity, ``\frac{\partial^2 F}{\partial \epsilo
 
 In this example, we don't consider any type of error, and we have a single main parameter ``\phi(t)``.
 
-For convenience, simple regularization functions are defined in [Regularization](api/regularization.md). Here we use the `regularization_cost_phase` which is adapted for a phase parameter.
+For convenience, simple regularization functions are defined in [Regularization](api/regularization.md). Here we use the `regularization_cost_phase` function which is adapted for a phase parameter.
 
 Additional parameters can be passed to the `Optim.optim` solver through the `additional_parameters` field. The list of configurable opttions for the solver can be found [here](https://julianlsolvers.github.io/Optim.jl/v0.9.3/user/config/).
 
@@ -164,7 +164,7 @@ using PyPlot
 # Plot the phase profile
 fig, ax = subplots()
 # Use unwrap_phase to ensure smooth phase representation
-ax.plot((1:ntimes) / ntimes * t0, unwrap_phase(optim_pulse[1:ntimes]))
+ax.plot((0:(ntimes-1)) / ntimes * t0, unwrap_phase(optim_pulse[1:ntimes]))
 ax.set_title("Time-optimal Rydberg pulse")
 ax.set_xlabel("Time (1/Ω)")
 ax.set_ylabel("Laser phase (rad)")
@@ -186,17 +186,17 @@ H(t) = H_0(t) + H_1(\epsilon_1) + \cdots + H_{n_e}(\epsilon_{n_e})
 
 where ``H_i(0) = 0``, and ``H_i(\epsilon_i)`` represents the additional Hamiltonian due to some error ``\epsilon_i``. One may also define a _noise operator_ ``O_i = \frac{\partial H_i}{\partial \epsilon_i} (0)``.
 
-These Hamiltonians ``H_i`` can be used to define an error source `ErrorSource(Herr)` with `Herr(t,x,x_add,eps) = some matrix`. Here we first consider two types of error: amplitude errors on the laser drive (parametrized by `\epsilon`) and angular frequency errors between the ground state manifold and the Rydberg manifold (parametrized by ``\delta``). Note that, because we consider a symmetric system, these errors apply to both atoms at the same time. Hence, the frequency errors cannot represent uncorrelated errors due to, e.g., Doppler-induced dephasing.
+These Hamiltonians ``H_i`` can be used to define an error source `ErrorSource(Herr)` with `Herr(t,x,x_add,eps) = some matrix`. Here we first consider two types of error: amplitude errors on the laser drive (parametrized by ``\epsilon``) and angular frequency errors between the ground state manifold and the Rydberg manifold (parametrized by ``\delta``). Note that, because we consider a symmetric system, these errors apply to both atoms at the same time. Hence, the frequency errors cannot represent uncorrelated errors due to, e.g., Doppler-induced dephasing.
 
 Let's define these Hamiltonians and we alter our `FidelityRobustGRAPEProblem` to include these error sources.
 
 ```julia
 # Define error Hamiltonians as deviations from the ideal Hamiltonian
 
-# amplitude error: variation in the Rabi frequency (laser power)
+# amplitude error: variation in the Rabi frequency (sqrt of laser power)
 H_amplitude_error(t, ϕ, x_add, ϵ) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1], ϵ, 0) - H0(t, ϕ, x_add)
 
-# Frequency error: variation in the laser detuning
+# Frequency error: variation in the laser detuning (in terms of angular frequency)
 H_frequency_error(t, ϕ, x_add, δ) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1], 0, δ) - H0(t, ϕ, x_add)
 
 rydberg_problem_with_errors = (@set rydberg_problem.unitary_problem.error_sources = [
@@ -295,7 +295,7 @@ To evaluate the sensitivity to the decay of the Rydberg states we can calculate 
 decay_operator(t, x, x_add, ϵ) = ϵ*collect(Diagonal([0, 0, 0, 1, 1]))
 
 # Update the problem to use this detection operator
-rydberg_problem_with_decay = (@set rydberg_problem_with_decay.unitary_problem.error_sources = [
+rydberg_problem_with_decay = (@set rydberg_problem.unitary_problem.error_sources = [
     ErrorSource(decay_operator)
 ])
 
@@ -351,8 +351,8 @@ The phase profiles of the time-optimal and amplitude-robust gates differ signifi
 
 ```julia
 fig, ax = subplots()
-ax.plot((1:ntimes) / ntimes * t0_to, unwrap_phase(optim_pulse[1:ntimes]), label="Time-optimal")
-ax.plot((1:ntimes) / ntimes * t0_ar, unwrap_phase(optim_pulse_ar[1:ntimes]), label="Amplitude-error robust")
+ax.plot((0:(ntimes-1)) / ntimes * t0_to, unwrap_phase(optim_pulse[1:ntimes]), label="Time-optimal")
+ax.plot((0:(ntimes-1)) / ntimes * t0_ar, unwrap_phase(optim_pulse_ar[1:ntimes]), label="Amplitude-error robust")
 ax.set_xlabel("Time (1/Ω)")
 ax.set_ylabel("Laser phase (rad)")
 ax.legend()

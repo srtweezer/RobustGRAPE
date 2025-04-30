@@ -63,8 +63,8 @@ optim_pulse = Optim.minimizer(res_optim_cz)
 optim_pulse_ar = Optim.minimizer(res_optim_cz_ar)
 using PyPlot
 fig, ax = subplots()
-ax.plot((1:ntimes) / ntimes * t0_to, unwrap_phase(optim_pulse[1:ntimes]), label="Time-optimal")
-ax.plot((1:ntimes) / ntimes * t0_ar, unwrap_phase(optim_pulse_ar[1:ntimes]), label="Amplitude-error robust")
+ax.plot((0:(ntimes-1)) / ntimes * t0_to, unwrap_phase(optim_pulse[1:ntimes]), label="Time-optimal")
+ax.plot((0:(ntimes-1)) / ntimes * t0_ar, unwrap_phase(optim_pulse_ar[1:ntimes]), label="Amplitude-error robust")
 ax.set_xlabel("Time (1/Ω)")
 ax.set_ylabel("Laser phase (rad)")
 ax.legend()
@@ -123,7 +123,7 @@ ax.set_xlim(0,5)
 ax.set_ylim(0,3.7)
 ax.set_xlabel("2πf/Ω")
 ax.set_ylabel("Laser intensity noise fidelity response")
-ax.set_title("Time-optimal gate")
+ax.set_title("Time-optimal vs amplitude-error robust")
 ax.legend()
 @show fig
 
@@ -136,7 +136,7 @@ ax.set_xlim(0,3.5)
 ax.set_ylim(0,500)
 ax.set_xlabel("2πf/Ω")
 ax.set_ylabel("Laser frequency noise fidelity response")
-ax.set_title("Time-optimal gate")
+ax.set_title("Time-optimal vs amplitude-error robust")
 ax.legend()
 @show fig
 

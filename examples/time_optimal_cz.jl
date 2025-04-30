@@ -50,7 +50,7 @@ res_optim_cz = optimize_fidelity_and_error_sources(rydberg_problem,rydberg_cz_pa
 optim_pulse = Optim.minimizer(res_optim_cz)
 using PyPlot
 fig, ax = subplots()
-ax.plot((1:ntimes) / ntimes * t0, unwrap_phase(optim_pulse[1:ntimes]))
+ax.plot((0:(ntimes-1)) / ntimes * t0, unwrap_phase(optim_pulse[1:ntimes]))
 ax.set_title("Time-optimal Rydberg pulse")
 ax.set_xlabel("Time (1/Ω)")
 ax.set_ylabel("Laser phase (rad)")
