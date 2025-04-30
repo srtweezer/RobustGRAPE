@@ -170,7 +170,7 @@ ax.set_xlabel("Time (1/Ω)")
 ax.set_ylabel("Laser phase (rad)")
 ```
 
-![Time-optimal CZ gate control phase](assets/time_optimal_cz.png)
+![Time-optimal CZ gate control phase](./assets/time_optimal_cz.png)
 
 ## Analyzing the time-optimal gate's error sensitivity
 
@@ -264,7 +264,7 @@ ax.set_ylabel("Laser intensity noise fidelity response")
 ax.set_title("Time-optimal gate response to intensity noise")
 ```
 
-![Time-optimal CZ gate laser intensity noise response](assets/to_cz_intensity_noise.png)
+![Time-optimal CZ gate laser intensity noise response](./assets/to_cz_intensity_noise.png)
 
 ```julia
 fig, ax = subplots()
@@ -276,7 +276,7 @@ ax.set_ylabel("Laser frequency noise fidelity response")
 ax.set_title("Time-optimal gate response to frequency noise")
 ```
 
-![Time-optimal CZ gate laser frequency noise response](assets/to_cz_frequency_noise.png)
+![Time-optimal CZ gate laser frequency noise response](./assets/to_cz_frequency_noise.png)
 
 
 ### Rydberg decay sensitivity
