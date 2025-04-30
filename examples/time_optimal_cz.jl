@@ -1,9 +1,6 @@
 ##
 using Pkg
-cd("robust-grape/RobustGRAPE")
-#Pkg.develop(path="..")
-#Pkg.resolve()
-Pkg.activate("RobustGRAPE")
+Pkg.resolve()
 using RobustGRAPE
 using RobustGRAPE.RydbergTools
 using LinearAlgebra
@@ -27,7 +24,7 @@ rydberg_problem = FidelityRobustGRAPEProblem(
         nb_additional_param=1,
         error_sources=[]
     ),
-    Diagonal([1,2,1,0,0]),
+    collect(Diagonal([1,2,1,0,0])),
     cz
 )
 
@@ -63,26 +60,15 @@ ax.set_ylabel("Laser phase (rad)")
 H_intensity_error(t,ϕ,x_add,ϵ) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1],ϵ,0) - H0(t,ϕ,x_add)
 H_frequency_error(t,ϕ,x_add,δ) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1],0,δ) - H0(t,ϕ,x_add)
 
-rydberg_problem_with_errors = FidelityRobustGRAPEProblem(
-    UnitaryRobustGRAPEProblem(
-        t0=t0,
-        ntimes=ntimes,
-        ndim=5,
-        H0=H0,
-        nb_additional_param=1,
-        error_sources=[
-            ErrorSource(H_intensity_error),
-            ErrorSource(H_frequency_error)
-        ]
-    ),
-    Diagonal([1,2,1,0,0]),
-    cz
-)
+
+rydberg_problem_with_errors = (@set rydberg_problem.unitary_problem.error_sources = [
+    ErrorSource(H_intensity_error),
+    ErrorSource(H_frequency_error)
+])
 
 F, _, F_d2err, _ = calculate_fidelity_and_derivatives(rydberg_problem_with_errors,optim_pulse)
-rydberg_problem_with_decay = deepcopy(rydberg_problem_with_errors)
 decay_operator(t,x,x_add,ϵ) = ϵ*collect(Diagonal([0,0,0,1,1]))
-rydberg_problem_with_decay = (@set rydberg_problem_with_decay.unitary_problem.error_sources = [
+rydberg_problem_with_decay = (@set rydberg_problem.unitary_problem.error_sources = [
     ErrorSource(decay_operator)
 ])
 rydberg_pop = calculate_expectation_values(rydberg_problem_with_decay, optim_pulse)[end,1]

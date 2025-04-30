@@ -19,6 +19,7 @@ end
 # Ensure the docs project environment is activated and packages are installed
 import Pkg
 Pkg.activate(pkg_path)
+Pkg.resolve()
 Pkg.instantiate()
 
 # Develop the main package from the current directory

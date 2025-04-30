@@ -1,12 +1,55 @@
-# Examples
+# Quick start and example
 
 ## Time-Optimal CZ Gate
 
-This example demonstrates how to optimize a CZ gate in a Rydberg atom system with minimal gate time. The optimization is based on the GRAPE algorithm which divides the control pulse into discrete time steps and optimizes the control parameters at each step.
+This example demonstrates how to compute the time-optimal quantum CZ gate in a two-atom symmetric blockaded Rydberg system, following the [work by Jandura and Pupillo](https://quantum-journal.org/papers/q-2022-05-13-712/).
+
 
 ### Problem Setup and Optimization
 
-First, we import the necessary packages and set up the problem:
+Before we define the problem computationally, a short explanation is required about the interfaces offered by the package to represent a GRAPE problem with robustness. The complete documentation can be found [here](api/types.md).
+
+We define a GRAPE problem as a Hamiltonian `H0`, a target unitary `U0`, a (pseudo)-projector on the computational subspace `P`, and a set of error sources (which can be empty). We leave aside errors for now and consider an ideal error-free scenario.
+
+`H0` and `U0` may depend on control parameters, which are separated in a set of _main_ parameters and a set of _additional_ parameters. Main parameters may only affect `H0` at a given time, while additional parameters can affect `H0` at any time, as well as `U0`. For instance, for the Rydberg system we're considering in this example, the phase ``\phi(t)`` is a main parameter, while ``\theta``, the single-qubit phase in the target unitary, is an additional parameter.
+
+We represent all the parameters in a single vector in the following way:
+
+```math
+x = (x_1 (t_1), x_2 (t_1), \dots, x_k (t_1), x_1 (t_2), \dots, x_k (t_n), x^{(a)}_1, \dots, x^{(a)}_l)
+```
+
+where ``t_i = t_{\mathrm{tot}} \times (i/n)``, ``k`` is the number of main parameters, and ``l`` is the number of additional parameters.
+
+Therefore, our problem interface includes a Hamiltonian function that has for signature `H(t::Real,x::Vector{<:Real},x_add::Vector{<:Real}) = some matrix`, where `t` is the time, `x` is the vector of main parameters at time `t`, and `x_add` is the vector of any additional parameters. We also need to define a target unitary function `target_unitary(x_add) = some matrix`.
+
+In this example, we work with the two-atom symmetric blockaded Rydberg Hamiltonian, expressed in the ``|00\rangle, |01\rangle, |11\rangle, |0r\rangle, |W\rangle`` symmetric blockaded basis where ``|W\rangle = (|1r\rangle + |r1\rangle)/\sqrt{2}``.
+
+```math
+H = 
+\begin{pmatrix}
+0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & \frac{(1+\epsilon)e^{-i\phi}}{2} & 0 \\
+0 & 0 & 0 & 0 & \frac{(1+\epsilon)e^{-i\phi}}{\sqrt{2}} \\
+0 & \frac{(1+\epsilon)e^{i\phi}}{2} & 0 & \delta & 0 \\
+0 & 0 & \frac{(1+\epsilon)e^{i\phi}}{\sqrt{2}} & 0 & \delta
+\end{pmatrix}
+```
+
+In the Rydberg basis, our target unitary is a parametrized CZ gate, defined as a CZ gate composed with a single-qubit ``\theta``-phase gate on each qubit:
+
+```math
+U = 
+\begin{pmatrix}
+1 & 0 & 0 & 0 & 0 \\
+0 & e^{i\theta} & 0 & 0 & 0 \\
+0 & 0 & e^{i(2\theta+\pi)} & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0
+\end{pmatrix}
+```
+
+We define these quantities computationally using the pre-defined functions in [Rydberg Tools](api/rydberg.md).
 
 ```julia
 using RobustGRAPE
@@ -31,9 +74,15 @@ H0(t, ϕ, x_add) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1], 0, 0)
 cz(x_add) = cz_with_1q_phase_symmetric(x_add[1])
 ```
 
-Here, `rydberg_hamiltonian_symmetric_blockaded` represents the Hamiltonian of a Rydberg atom system in a blockade configuration. The function takes the laser phase `ϕ[1]` as its first argument, with additional parameters for intensity and detuning errors (set to 0 here).
+Here, `rydberg_hamiltonian_symmetric_blockaded` represents the above Hamiltonian. We set the intensity and detuning errors (respectively, ``\epsilon`` and ``\delta``) to zero.
 
-Next, we create the optimization problem:
+To define our robust GRAPE problem, we also need to set a (pseudo)-projector, which is used to define the computational subspace on which the average fidelity is averaged. It needs to be a diagonal matrix. The algorithm will decompose this projector into ``P = P_0 \times W`` where ``P_0`` is the projector with only ones and zeros on the diagonal, and ``W`` is a diagonal matrix that will be used to weight the trace: ``A \mapsto tr(W A)``. This is relevant for systems with symmetries such that the fidelity has to be averaged with weighting specific states to account for the symmetry. For instance, in the Rydberg example we're considering, we consider a simplified Hilbert space ``|00\rangle, |01\rangle, |11\rangle, |0r\rangle, |W\rangle``. Therefore the effective trace needs to account twice for the ``|01\rangle`` state. Hence we define the pseudo-projector:
+
+```math
+P = \mathrm{diag}(1,2,1,0,0)
+```
+
+With this in mind, we can define our problem:
 
 ```julia
 # Create the optimization problem
@@ -46,17 +95,26 @@ rydberg_problem = FidelityRobustGRAPEProblem(
         nb_additional_param=1,  # One additional parameter (phase)
         error_sources=[]   # No error sources for basic optimization
     ),
-    Diagonal([1, 2, 1, 0, 0]),  # Target state projection (computational subspace)
+    collect(Diagonal([1, 2, 1, 0, 0])),  # Target state projection (computational subspace)
     cz                          # Target operation
 )
 ```
 
-The problem setup involves:
-- A `UnitaryRobustGRAPEProblem` that defines the physical system and dynamics
-- A `FidelityRobustGRAPEProblem` that adds the target operation and subspace projection
-- The projection `Diagonal([1, 2, 1, 0, 0])` restricts the optimization to the computational subspace
+Then we can define our optimization problem. Note that it would be relatively straightforward to directly use the interface we just created with the `calculate_fidelity_and_derivatives` to find the time-optimal gate. Nevertheless, the package offers a higher-level interface to perform this optimization more conveniently.
 
-Now we configure the optimization parameters:
+This interface minimizes a cost function:
+
+```math
+C = 1-F + c_1 \left( \frac{\partial^2 F}{\partial \epsilon_1^2} \right)^2 + \cdots + c_{n_e} \left( \frac{\partial^2 F}{\partial \epsilon_{n_e}^2} \right)^2 + r^{(1)}_1 R^{(1)}_1 + \cdots r^{(1)}_k R^{(1)}_k + r^{(2)}_1 R^{(2)}_1 + \cdots r^{(2)}_k R^{(2)}_k
+```
+
+where ``F`` is the average gate fidelity, ``\frac{\partial^2 F}{\partial \epsilon_i^2}`` is the sensitivity to an error ``\epsilon_i``, ``R^{(1)}_j`` and ``R^{(2)}_j`` are first- and second-order regularization functions that can be defined by the user for each set of main control parameters. This helps achieve a smoother pulse and can promote better convergence.
+
+In this example, we don't consider any type of error, and we have a single main parameter ``\phi(t)``.
+
+For convenience, simple regularization functions are defined in [Regularization](api/regularization.md). Here we use the `regularization_cost_phase` which is adapted for a phase parameter.
+
+Additional parameters can be passed to the `Optim.optim` solver through the `additional_parameters` field. The list of configurable opttions for the solver can be found [here](https://julianlsolvers.github.io/Optim.jl/v0.9.3/user/config/).
 
 ```julia
 # Configure optimization parameters
@@ -80,8 +138,6 @@ rydberg_cz_parameters = FidelityRobustGRAPEParameters(
     )
 )
 ```
-
-The `regularization_cost_phase` function is particularly important for phase-based control, as it ensures smooth transitions in the phase values, which is crucial for experimental implementation.
 
 Finally, we run the optimization:
 
@@ -113,13 +169,25 @@ ax.set_xlabel("Time (1/Ω)")
 ax.set_ylabel("Laser phase (rad)")
 ```
 
-## Robust Control Pulse Design
+![Time-optimal CZ gate control phase](../assets/time_optimal_cz.png)
+
+## Analyzing the time-optimal gate's error sensitivity
 
 A key feature of RobustGRAPE is the ability to analyze and optimize control pulses for robustness against various sources of noise and experimental imperfections. This example demonstrates how to evaluate the sensitivity of an optimized quantum gate to common error sources.
 
 ### Defining Error Hamiltonians
 
-First, we need to define how different error sources affect our system Hamiltonian:
+The total system Hamiltonian has to be decomposed into:
+
+```math
+H(t) = H_0(t) + H_1(\epsilon_1) + \cdots + H_{n_e}(\epsilon_{n_e})
+```
+
+where ``H_i(0) = 0``, and ``H_i(\epsilon_i)`` represents the additional Hamiltonian due to some error ``\epsilon_i``. One may also define a _noise operator_ ``O_i = \frac{\partial H_i}{\partial \epsilon_i} (0)``.
+
+These Hamiltonians ``H_i`` can be used to define an error source `ErrorSource(Herr)` with `Herr(t,x,x_add,eps) = some matrix`. Here we first consider two types of error: amplitude errors on the laser drive (parametrized by `\epsilon`) and angular frequency errors between the ground state manifold and the Rydberg manifold (parametrized by `\delta`). Note that, because we consider a symmetric system, these errors apply to both atoms at the same time. Hence, the frequency errors cannot represent uncorrelated errors due to, e.g., Doppler-induced dephasing.
+
+Let's define these Hamiltonians and we alter our `FidelityRobustGRAPEProblem` to include these error sources.
 
 ```julia
 # Define error Hamiltonians as deviations from the ideal Hamiltonian
@@ -129,38 +197,17 @@ H_intensity_error(t, ϕ, x_add, ϵ) = rydberg_hamiltonian_symmetric_blockaded(ϕ
 
 # Frequency error: variation in the laser detuning
 H_frequency_error(t, ϕ, x_add, δ) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1], 0, δ) - H0(t, ϕ, x_add)
+
+rydberg_problem_with_errors = (@set rydberg_problem.unitary_problem.error_sources = [
+    ErrorSource(H_intensity_error),
+    ErrorSource(H_frequency_error)
+])
 ```
 
-Each error Hamiltonian represents how the system dynamics change when a specific parameter deviates from its nominal value:
-- The intensity error (ϵ) represents fluctuations in the laser power or coupling strength
-- The frequency error (δ) represents fluctuations in the laser frequency or detuning
 
-### Creating a Problem with Error Sources
+### Static error sensitivity
 
-Next, we create a problem definition that includes these error sources:
-
-```julia
-# Create a GRAPE problem with error sources
-rydberg_problem_with_errors = FidelityRobustGRAPEProblem(
-    UnitaryRobustGRAPEProblem(
-        t0=t0,
-        ntimes=ntimes,
-        ndim=5,
-        H0=H0,
-        nb_additional_param=1,
-        error_sources=[
-            ErrorSource(H_intensity_error),  # First error source: intensity fluctuations
-            ErrorSource(H_frequency_error)   # Second error source: frequency fluctuations
-        ]
-    ),
-    Diagonal([1, 2, 1, 0, 0]),  # Target state projection
-    cz                          # Target operation
-)
-```
-
-### Analyzing Error Sensitivity
-
-Now we can analyze how sensitive our previously optimized pulse is to these error sources:
+Now we can analyze how sensitive our previously optimized pulse is to a static error induced by these noise sources, by computing ``\frac{\partial^2 F}{\partial^ \epsilon_i^2}``. Later on, we will demonstrate how to include this sensitivity to the optimization procedure.
 
 ```julia
 # Analyze sensitivity to errors with previously optimized pulse
@@ -174,41 +221,12 @@ println("Sensitivity to intensity errors: F = 1 - $(-F_d2err[1]/2) × ϵ²")
 println("Sensitivity to frequency errors: F = 1 - $(-F_d2err[2]/2) × δ²")
 ```
 
-For small errors, the infidelity (1-F) scales quadratically with the error amplitude. The coefficients `-F_d2err[i]/2` indicate how sensitive the gate is to each error source - smaller values mean greater robustness.
 
-### Designing Robust Pulses
+### Computing the fidelity response function
 
-To optimize for robustness, we can include error sensitivity in the optimization objective:
+In AMO physics, it is common to encounter systems whose noise is parametrized by a classical process described by a power spectral density. In [this work](https://journals.aps.org/prxquantum/abstract/10.1103/PRXQuantum.6.010331), it was shown that the fidelity sensitivity to such noise processes can be efficiently described by a frequency-domain fidelity response function. This generalizes the static sensitivity generalized earlier (notably, if we note ``I(f)`` this function, then we have ``I(0) = -\frac{1}{2} \frac{\partial^2 F}{\partial \epsilon^2}``).
 
-```julia
-# Create parameters for robust optimization
-robust_parameters = FidelityRobustGRAPEParameters(
-    x_initial = optim_pulse,  # Start from previously optimized pulse
-    regularization_functions = [regularization_cost_phase],
-    regularization_coeff1=[1e-7],
-    regularization_coeff2=[1e-7],
-    error_source_coeff=[0.5, 0.5],  # Non-zero weights for error sensitivities
-    time_limit=60,
-    additional_parameters = Dict(
-        :show_trace => true,
-        :show_every => 10,
-        :g_tol => 1e-9
-    )
-)
-
-# Run robust optimization
-# res_robust = optimize_fidelity_and_error_sources(rydberg_problem_with_errors, robust_parameters)
-```
-
-Setting non-zero `error_source_coeff` values instructs the optimizer to minimize both the gate infidelity and the sensitivity to errors, creating a control pulse that maintains high fidelity even in the presence of experimental imperfections.
-
-## Frequency Domain Analysis
-
-RobustGRAPE provides powerful tools for analyzing the frequency-dependent response of quantum gates to noise. This frequency domain analysis is crucial for understanding how a gate responds to noise at different timescales, which can inform both gate design and experimental implementation.
-
-### Computing the Frequency Response
-
-The frequency response calculation transforms the time-dependent sensitivity of a quantum gate into the frequency domain:
+Eq (8) in the reference above shows how the expected fidelity can be simply obtained from knowing the response function and the noise process (e.g. laser intensity) PSD. This package provides an efficient way to compute the response function:
 
 ```julia
 # Calculate frequency response with oversampling for better resolution
@@ -225,12 +243,14 @@ response_fct, frequencies = calculate_fidelity_response_fft(
 ```
 
 The `calculate_fidelity_response_fft` function computes how the gate fidelity responds to time-dependent noise at different frequencies. The returned matrices contain:
-- `response_fct`: A matrix where each column corresponds to an error source, and each row to a frequency
-- `frequencies`: The corresponding frequency values (in units of Ω/2π)
+- `response_fct`: A matrix of size `(ntimes*oversampling,nerr)`
+- `frequencies`: The corresponding frequency values (in units of Ω/2π) with size `ntimes*oversampling`.
 
-### Visualizing the Intensity Noise Response
 
-Let's plot the response to intensity noise:
+Let's plot the response to intensity noise and frequency noise.
+Note that we apply a scaling factor to both such that we match usual conventions:
+- ``(1/2)^2`` for the intensity noise because our Hamiltonian is written as a function of amplitude deviation
+- ``(2\pi)^2`` for the frequency noise because our Hamiltonian is written as a function of angular frequency deviation.
 
 ```julia
 using PyPlot
@@ -243,15 +263,7 @@ ax.set_ylabel("Laser intensity noise fidelity response")
 ax.set_title("Time-optimal gate response to intensity noise")
 ```
 
-This plot shows how sensitive the gate is to intensity fluctuations at different frequencies. Key insights:
-- Higher values indicate greater sensitivity to noise at that frequency
-- The DC component (f=0) corresponds to static offsets in laser intensity
-- The frequency axis is normalized to the Rabi frequency (Ω)
-- Peaks in the response indicate frequencies where the gate is particularly vulnerable to noise
-
-### Visualizing the Frequency Noise Response
-
-Similarly, we can plot the response to laser frequency noise:
+![Time-optimal CZ gate laser intensity noise response](../assets/to_cz_intensity_noise.png)
 
 ```julia
 fig, ax = subplots()
@@ -263,28 +275,15 @@ ax.set_ylabel("Laser frequency noise fidelity response")
 ax.set_title("Time-optimal gate response to frequency noise")
 ```
 
-The scaling factor `(2*π)^2` adjusts the response to represent the sensitivity to frequency fluctuations in standard units, where the detuning is measured in radians/second.
+![Time-optimal CZ gate laser frequency noise response](../assets/to_cz_frequency_noise.png)
 
-### Applications of Frequency Analysis
 
-Frequency response analysis has several important applications:
-1. **Filter Design**: Design filters to suppress noise at frequencies where the gate is most sensitive
-2. **Pulse Optimization**: Modify control pulses to reduce sensitivity at problematic frequencies
-3. **Error Budgeting**: Allocate error budget across different noise sources based on their impact
-4. **Hardware Requirements**: Determine spectral noise requirements for experimental equipment
+### Rydberg decay sensitivity
 
-## Additional Analysis: Rydberg Population
 
-Beyond fidelity and error sensitivity, RobustGRAPE allows you to analyze other important properties of quantum control pulses. For Rydberg atom systems, one crucial metric is the total time spent in the Rydberg state, as these states are susceptible to decoherence and decay.
-
-### Measuring Rydberg State Population
-
-We can calculate the integrated Rydberg state population during gate execution:
+To evaluate the sensitivity to the decay of the Rydberg states we can calculate the integrated Rydberg state population during gate execution:
 
 ```julia
-# Create a specialized problem for measuring Rydberg population
-rydberg_problem_with_decay = deepcopy(rydberg_problem_with_errors)
-
 # Define an operator that detects population in Rydberg states
 # The [0,0,0,1,1] pattern targets the Rydberg states in our 5-level system
 decay_operator(t, x, x_add, ϵ) = ϵ*collect(Diagonal([0, 0, 0, 1, 1]))
@@ -304,29 +303,3 @@ println("Integrated Rydberg population: $(rydberg_pop)/Ω")
 ```
 
 The integrated Rydberg population is a dimensionless quantity that, when multiplied by the decay rate, gives the total probability of decay during the gate operation. Lower values indicate a more resilient gate against decoherence.
-
-### Visualizing State Evolution
-
-You can also visualize how different states evolve during the gate operation:
-
-```julia
-# Calculate state evolution at multiple time points
-time_points = LinRange(0, t0, 100)
-state_evolution = calculate_state_evolution(rydberg_problem, optim_pulse, time_points)
-
-# Plot Rydberg state population vs time for an initial state
-initial_state = [1, 0, 0, 0, 0]  # Example: starting in |00⟩ state
-populations = [abs2(state_evolution[i,4,1]) + abs2(state_evolution[i,5,1]) for i in 1:length(time_points)]
-
-# Plot the result
-using PyPlot
-fig, ax = subplots()
-ax.plot(time_points, populations)
-ax.set_xlabel("Time (1/Ω)")
-ax.set_ylabel("Rydberg state population")
-ax.set_title("Rydberg population during gate execution")
-```
-
-By analyzing and optimizing these additional properties, you can design quantum gates that not only achieve high fidelity but are also robust against practical experimental constraints like decoherence and decay.
-
-For complete working examples, see the `examples/` directory in the package repository.

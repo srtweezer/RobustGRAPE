@@ -23,14 +23,11 @@ makeinfo = (
         assets = [],
         sidebar_sitename = false,
     ),
-    sitename = "RobustGRAPE.jl",
+    sitename = "RobustGRAPE",
     authors = "Endres Lab",
     pages = [
         "Home" => "index.md",
-        "User Guide" => [
-            "Introduction" => "guide/introduction.md",
-            "Getting Started" => "guide/getting-started.md",
-        ],
+        "Quick start and example" => "examples.md",
         "API Reference" => [
             "Types" => "api/types.md",
             "Unitary Calculations" => "api/unitary.md",
@@ -38,7 +35,6 @@ makeinfo = (
             "Regularization" => "api/regularization.md",
             "Rydberg Tools" => "api/rydberg.md",
         ],
-        "Examples" => "examples.md",
     ],
     warnonly = true
 )
