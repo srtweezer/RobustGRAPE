@@ -57,12 +57,12 @@ ax.set_ylabel("Laser phase (rad)")
 @show fig
 ##
 
-H_intensity_error(t,ϕ,x_add,ϵ) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1],ϵ,0) - H0(t,ϕ,x_add)
+H_amplitude_error(t,ϕ,x_add,ϵ) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1],ϵ,0) - H0(t,ϕ,x_add)
 H_frequency_error(t,ϕ,x_add,δ) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1],0,δ) - H0(t,ϕ,x_add)
 
 
 rydberg_problem_with_errors = (@set rydberg_problem.unitary_problem.error_sources = [
-    ErrorSource(H_intensity_error),
+    ErrorSource(H_amplitude_error),
     ErrorSource(H_frequency_error)
 ])
 
@@ -73,7 +73,7 @@ rydberg_problem_with_decay = (@set rydberg_problem.unitary_problem.error_sources
 ])
 rydberg_pop = calculate_expectation_values(rydberg_problem_with_decay, optim_pulse)[end,1]
 println("Infidelity: $(1-F)")
-println("Sensitivity to intensity errors: F = 1 - $(-F_d2err[1]/2) × ϵ²")
+println("Sensitivity to amplitude errors: F = 1 - $(-F_d2err[1]/2) × ϵ²")
 println("Sensitivity to frequency errors: F = 1 - $(-F_d2err[2]/2) × δ²")
 println("Integrated Rydberg population: $(rydberg_pop)/Ω")
 ##

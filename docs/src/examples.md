@@ -4,6 +4,7 @@
 
 This example demonstrates how to compute the time-optimal quantum CZ gate in a two-atom symmetric blockaded Rydberg system, following the [work by Jandura and Pupillo](https://quantum-journal.org/papers/q-2022-05-13-712/).
 
+This example can be found in `RobustGRAPE/examples/time_optimal_cz.jl`.
 
 ### Problem Setup and Optimization
 
@@ -169,7 +170,7 @@ ax.set_xlabel("Time (1/Ω)")
 ax.set_ylabel("Laser phase (rad)")
 ```
 
-![Time-optimal CZ gate control phase](../assets/time_optimal_cz.png)
+![Time-optimal CZ gate control phase](assets/time_optimal_cz.png)
 
 ## Analyzing the time-optimal gate's error sensitivity
 
@@ -192,14 +193,14 @@ Let's define these Hamiltonians and we alter our `FidelityRobustGRAPEProblem` to
 ```julia
 # Define error Hamiltonians as deviations from the ideal Hamiltonian
 
-# Intensity error: variation in the Rabi frequency (laser power)
-H_intensity_error(t, ϕ, x_add, ϵ) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1], ϵ, 0) - H0(t, ϕ, x_add)
+# amplitude error: variation in the Rabi frequency (laser power)
+H_amplitude_error(t, ϕ, x_add, ϵ) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1], ϵ, 0) - H0(t, ϕ, x_add)
 
 # Frequency error: variation in the laser detuning
 H_frequency_error(t, ϕ, x_add, δ) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1], 0, δ) - H0(t, ϕ, x_add)
 
 rydberg_problem_with_errors = (@set rydberg_problem.unitary_problem.error_sources = [
-    ErrorSource(H_intensity_error),
+    ErrorSource(H_amplitude_error),
     ErrorSource(H_frequency_error)
 ])
 ```
@@ -217,7 +218,7 @@ F, _, F_d2err, _ = calculate_fidelity_and_derivatives(rydberg_problem_with_error
 # These values tell us how quickly the fidelity decreases with small errors
 
 println("Infidelity: $(1-F)")
-println("Sensitivity to intensity errors: F = 1 - $(-F_d2err[1]/2) × ϵ²")
+println("Sensitivity to amplitude errors: F = 1 - $(-F_d2err[1]/2) × ϵ²")
 println("Sensitivity to frequency errors: F = 1 - $(-F_d2err[2]/2) × δ²")
 ```
 
@@ -263,7 +264,7 @@ ax.set_ylabel("Laser intensity noise fidelity response")
 ax.set_title("Time-optimal gate response to intensity noise")
 ```
 
-![Time-optimal CZ gate laser intensity noise response](../assets/to_cz_intensity_noise.png)
+![Time-optimal CZ gate laser intensity noise response](assets/to_cz_intensity_noise.png)
 
 ```julia
 fig, ax = subplots()
@@ -275,7 +276,7 @@ ax.set_ylabel("Laser frequency noise fidelity response")
 ax.set_title("Time-optimal gate response to frequency noise")
 ```
 
-![Time-optimal CZ gate laser frequency noise response](../assets/to_cz_frequency_noise.png)
+![Time-optimal CZ gate laser frequency noise response](assets/to_cz_frequency_noise.png)
 
 
 ### Rydberg decay sensitivity
