@@ -33,7 +33,6 @@ Manifest.toml
 
 # Output files
 *.pdf
-*.png
 *.svg
 *.gif
 *.log
