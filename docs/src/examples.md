@@ -186,7 +186,7 @@ H(t) = H_0(t) + H_1(\epsilon_1) + \cdots + H_{n_e}(\epsilon_{n_e})
 
 where ``H_i(0) = 0``, and ``H_i(\epsilon_i)`` represents the additional Hamiltonian due to some error ``\epsilon_i``. One may also define a _noise operator_ ``O_i = \frac{\partial H_i}{\partial \epsilon_i} (0)``.
 
-These Hamiltonians ``H_i`` can be used to define an error source `ErrorSource(Herr)` with `Herr(t,x,x_add,eps) = some matrix`. Here we first consider two types of error: amplitude errors on the laser drive (parametrized by `\epsilon`) and angular frequency errors between the ground state manifold and the Rydberg manifold (parametrized by `\delta`). Note that, because we consider a symmetric system, these errors apply to both atoms at the same time. Hence, the frequency errors cannot represent uncorrelated errors due to, e.g., Doppler-induced dephasing.
+These Hamiltonians ``H_i`` can be used to define an error source `ErrorSource(Herr)` with `Herr(t,x,x_add,eps) = some matrix`. Here we first consider two types of error: amplitude errors on the laser drive (parametrized by `\epsilon`) and angular frequency errors between the ground state manifold and the Rydberg manifold (parametrized by ``\delta``). Note that, because we consider a symmetric system, these errors apply to both atoms at the same time. Hence, the frequency errors cannot represent uncorrelated errors due to, e.g., Doppler-induced dephasing.
 
 Let's define these Hamiltonians and we alter our `FidelityRobustGRAPEProblem` to include these error sources.
 
@@ -208,7 +208,7 @@ rydberg_problem_with_errors = (@set rydberg_problem.unitary_problem.error_source
 
 ### Static error sensitivity
 
-Now we can analyze how sensitive our previously optimized pulse is to a static error induced by these noise sources, by computing ``\frac{\partial^2 F}{\partial^ \epsilon_i^2}``. Later on, we will demonstrate how to include this sensitivity to the optimization procedure.
+Now we can analyze how sensitive our previously optimized pulse is to a static error induced by these noise sources, by computing ``\frac{\partial^2 F}{\partial \epsilon_i^2}``. Later on, we will demonstrate how to include this sensitivity to the optimization procedure.
 
 ```julia
 # Analyze sensitivity to errors with previously optimized pulse
@@ -220,6 +220,11 @@ F, _, F_d2err, _ = calculate_fidelity_and_derivatives(rydberg_problem_with_error
 println("Infidelity: $(1-F)")
 println("Sensitivity to amplitude errors: F = 1 - $(-F_d2err[1]/2) × ϵ²")
 println("Sensitivity to frequency errors: F = 1 - $(-F_d2err[2]/2) × δ²")
+
+# Returns
+# Infidelity: 1.3855583347321954e-13
+# Sensitivity to amplitude errors: F = 1 - 4.211625822890814 × ϵ²
+# Sensitivity to frequency errors: F = 1 - 2.8602011006871577 × δ²
 ```
 
 
@@ -301,6 +306,99 @@ rydberg_pops = calculate_expectation_values(rydberg_problem_with_decay, optim_pu
 # Extract the final integrated Rydberg population (first error source, end of evolution)
 rydberg_pop = rydberg_pops[end, 1]
 println("Integrated Rydberg population: $(rydberg_pop)/Ω")
+# Returns:
+# Integrated Rydberg population: 2.963973401634995/Ω
 ```
 
 The integrated Rydberg population is a dimensionless quantity that, when multiplied by the decay rate, gives the total probability of decay during the gate operation. Lower values indicate a more resilient gate against decoherence.
+
+## Amplitude-Error Robust CZ Gate
+
+RobustGRAPE allows us to design pulses that are resilient to specific types of errors by including the error sensitivity in the optimization cost function. Here we show how to obtain the (approximate) amplitude-error resilient pulse derived in this [work](https://link.aps.org/doi/10.1103/PRXQuantum.4.020336) for a total gate time ``T \approx 14.32/\Omega``.
+
+The full working example is available in the `RobustGRAPE/examples/ar_cz.jl` notebook.
+
+### Setting up the robust optimization
+
+To design an amplitude-error robust gate, we include the amplitude error source in our problem definition and set a non-zero coefficient for the error sensitivity term in the cost function:
+
+```julia
+# Reduce the number of time steps for faster calculation
+ntimes = 150
+# Define the problem with amplitude error
+rydberg_problem_ar = (@set rydberg_problem.unitary_problem.error_sources = [
+    ErrorSource(H_amplitude_error)
+])
+# Use a longer evolution time for improved robustness
+rydberg_problem_ar = (@set rydberg_problem_ar.unitary_problem.t0 = 14.32)
+
+# Configure parameters for robust optimization
+rydberg_cz_parameters_ar = (@set rydberg_cz_parameters.error_source_coeff = [1e-4])
+rydberg_cz_parameters_ar = (@set rydberg_cz_parameters_ar.time_limit = 300)
+rydberg_cz_parameters_ar = (@set rydberg_cz_parameters_ar.regularization_coeff1 = [1e-6])
+rydberg_cz_parameters_ar = (@set rydberg_cz_parameters_ar.regularization_coeff2 = [1e-6])
+
+# Run optimization
+res_optim_cz_ar = optimize_fidelity_and_error_sources(rydberg_problem_ar, rydberg_cz_parameters_ar)
+optim_pulse_ar = Optim.minimizer(res_optim_cz_ar)
+```
+
+Note that we increase the regularization coefficients as we find that it helps achieve better convergence when including error robustness in the optimization.
+
+### Comparing time-optimal and robust pulses
+
+The phase profiles of the time-optimal and amplitude-robust gates differ significantly:
+
+```julia
+fig, ax = subplots()
+ax.plot((1:ntimes) / ntimes * t0_to, unwrap_phase(optim_pulse[1:ntimes]), label="Time-optimal")
+ax.plot((1:ntimes) / ntimes * t0_ar, unwrap_phase(optim_pulse_ar[1:ntimes]), label="Amplitude-error robust")
+ax.set_xlabel("Time (1/Ω)")
+ax.set_ylabel("Laser phase (rad)")
+ax.legend()
+```
+
+![Time-optimal vs Amplitude-error robust CZ gates](./assets/ar_vs_to.png)
+
+### Comparing error sensitivities and frequency responses
+
+We can directly compare the sensitivity of both gates to various error sources:
+
+```julia
+# Create problem definitions with both error sources for comparison
+rydberg_problem_with_errors = (@set rydberg_problem.unitary_problem.error_sources = [
+    ErrorSource(H_amplitude_error),
+    ErrorSource(H_frequency_error)
+])
+
+rydberg_problem_with_errors_ar = (@set rydberg_problem_ar.unitary_problem.error_sources = [
+    ErrorSource(H_amplitude_error),
+    ErrorSource(H_frequency_error)
+])
+
+# Calculate frequency response for both gates
+response_fct, frequencies = calculate_fidelity_response_fft(rydberg_problem_with_errors,optim_pulse; oversampling=30)
+response_fct_ar, frequencies_ar = calculate_fidelity_response_fft(rydberg_problem_with_errors_ar,optim_pulse_ar; oversampling=30)
+
+# Compare Rydberg state population (relevant for decay)
+rydberg_pop = calculate_expectation_values(rydberg_problem_with_decay, optim_pulse)[end,1]
+rydberg_pop_ar = calculate_expectation_values(rydberg_problem_with_decay_ar, optim_pulse_ar)[end,1]
+println("Time-optimal gate")
+println("Integrated Rydberg population: $(rydberg_pop)/Ω")
+
+println("\nAmplitude-error robust gate")
+println("Integrated Rydberg population: $(rydberg_pop_ar)/Ω")
+
+# Returns:
+# Time-optimal gate
+# Integrated Rydberg population: 2.963781384493184/Ω
+
+# Amplitude-error robust gate
+# Integrated Rydberg population: 5.198968153640445/Ω
+```
+
+The robust gate shows dramatically improved resilience against static amplitude errors compared to the time-optimal gate. This resilience comes with a steep trade-off in terms of sensitivity to dynamic intensity noise and to frequency noise, as well as increased gate duration and integrated Rydberg population:
+
+![Intensity noise response comparison](./assets/ar_to_intensity_noise.png)
+
+![Frequency noise response comparison](./assets/ar_to_frequency_noise.png)
