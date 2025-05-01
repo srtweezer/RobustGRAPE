@@ -103,7 +103,7 @@ H =
 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\\\
 0 & 0 & 0 & 0 & \\frac{\\Omega_1 e^{-i\\phi}}{2} & 0 & 0 & 0 & 0 \\\\
 0 & 0 & 0 & 0 & 0 & \\frac{\\Omega_2 e^{-i\\phi}}{2} & 0 & 0 & 0 \\\\
-0 & 0 & 0 & 0 & 0 & 0 & \\frac{\\Omega_1 e^{-i\\phi}}{2} & \\Omega_2 e^{-i\\phi} & 0 \\\\
+0 & 0 & 0 & 0 & 0 & 0 & \\frac{\\Omega_1 e^{-i\\phi}}{2} & \\frac{\\Omega_2 e^{-i\\phi}}{2} & 0 \\\\
 0 & \\frac{\\Omega_1 e^{i\\phi}}{2} & 0 & 0 & \\delta_1 & 0 & 0 & 0 & 0 \\\\
 0 & 0 & \\frac{\\Omega_2 e^{i\\phi}}{2} & 0 & 0 & \\delta_2 & 0 & 0 & 0 \\\\
 0 & 0 & 0 & 0 & \\frac{\\Omega_1 e^{i\\phi}}{2} & 0 & \\delta_1 & 0 & \\frac{\\Omega_2 e^{-i\\phi}}{2} \\\\

@@ -11,6 +11,7 @@ Manifest.toml
 
 # Julia package manager
 .julia/
+/internal/
 
 # Build artifacts
 *.o

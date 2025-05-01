@@ -12,9 +12,9 @@ Calculate the fidelity between the evolved unitary and target unitary, along wit
 # Returns
 A tuple with:
 - `F`: The fidelity value
-- `F_dx_tot`: Combined derivatives with respect to all control parameters (both main and additional)
+- `F_dx`: Combined derivatives with respect to all control parameters (both main and additional)
 - `F_d2err`: Second derivatives with respect to error sources
-- `F_d2err_dx_tot`: Combined mixed derivatives for error and all control parameters
+- `F_d2err_dx`: Combined mixed derivatives for error and all control parameters
 """
 function calculate_fidelity_and_derivatives(fidelity_problem::FidelityRobustGRAPEProblem, x::Vector{<:Real})
     unitary_problem = fidelity_problem.unitary_problem

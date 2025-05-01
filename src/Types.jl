@@ -7,7 +7,7 @@ using Optim
 Represents a source of error in the Hamiltonian.
 
 # Fields
-- `Herror::Function`: A function that returns the error Hamiltonian. Signature: `Herror(time::Real, x::Vector{<:Real}, x_add::Vector{<:Real}, err::Real)`. `x`` has for size the number of main parameters, `x_add` has for size the number of additional parameters.
+- `Herror::Function`: A function that returns the error Hamiltonian matrix. Signature: `Herror(time::Real, x::Vector{<:Real}, x_add::Vector{<:Real}, err::Real)`. `x` has for size the number of main parameters, `x_add` has for size the number of additional parameters.
 """
 @with_kw struct ErrorSource
     Herror::Function
@@ -22,7 +22,7 @@ Represents a robust GRAPE unitary calculation problem.
 - `t0::Real`: Total evolution time
 - `ntimes::Int`: Number of time steps
 - `ndim::Int`: Dimension of the Hilbert space
-- `H0::Function`: Main Hamiltonian function. Signature: H0(time::Real, x::Vector{<:Real}, x_add::Vector{<:Real}). x has for size the number of main parameters, x_add has for size the number of additional parameters.
+- `H0::Function`: Main Hamiltonian function (must return a matrix). Signature: `H0(time::Real, x::Vector{<:Real}, x_add::Vector{<:Real})``. x has for size the number of main parameters, x_add has for size the number of additional parameters.
 - `nb_additional_param::Int`: Number of additional parameters
 - `error_sources::Vector{ErrorSource}`: List of error sources
 - `ϵ::Real = 1e-8`: Small parameter for first-order finite difference
@@ -46,7 +46,7 @@ Represents a robust GRAPE fidelity calculation problem.
 
 # Fields
 - `unitary_problem::UnitaryRobustGRAPEProblem`: The underlying optimization problem
-- `projector::Matrix{<:Real}`: Projector for subspace fidelity
+- `projector::Matrix{<:Real}`: Projector for subspace fidelity. It can be a "pseudo"-projector (see Quick start and example for more information)
 - `target_unitary::Function`: Function that returns the target unitary. Signature: `target_unitary(x_add::Vector{<:Real})` where `x_add` has size the number of additional parameters.
 """
 @with_kw struct FidelityRobustGRAPEProblem
