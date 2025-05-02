@@ -42,40 +42,40 @@ function calculate_unitary_and_derivatives(problem::UnitaryRobustGRAPEProblem, x
     infim_evo_dx_add_array = zeros(Complex,ndim,ndim,problem.nb_additional_param)
 
     for nt=1:ntimes
-        infim_evo = exp(-im*dt*problem.H0(dt*(nt-1), x_main[:,nt], x_add))
+        infim_evo = exp(-im*dt*problem.H0(nt, x_main[:,nt], x_add))
         cum_evo = infim_evo*cum_evo
         cum_evo_inv = inv(cum_evo)
         x_main_copy = copy(x_main[:,nt])
         for np=1:nparam
             x_main_copy[np] += problem.ϵ
-            infim_evo_dx = exp(-im*dt*problem.H0(dt*(nt-1), x_main_copy, x_add))
+            infim_evo_dx = exp(-im*dt*problem.H0(nt, x_main_copy, x_add))
             infimU_dx[:,:,np,nt] = cum_evo_inv*((1/problem.ϵ) *(infim_evo_dx-infim_evo))*old_cum_evo
             x_main_copy[np] = x_main[np,nt] + problem.ϵ2
-            infim_evo_dx_array[:,:,np] = exp(-im*dt*problem.H0(dt*(nt-1), x_main_copy, x_add))
+            infim_evo_dx_array[:,:,np] = exp(-im*dt*problem.H0(nt, x_main_copy, x_add))
             x_main_copy[np] = x_main[np,nt]
         end
         for npa=1:problem.nb_additional_param
             x_add_copy[npa] += problem.ϵ
-            infim_evo_dx_add = exp(-im*dt*problem.H0(dt*(nt-1), x_main[:,nt], x_add_copy))
+            infim_evo_dx_add = exp(-im*dt*problem.H0(nt, x_main[:,nt], x_add_copy))
             infimU_dx_add[:,:,npa,nt] = cum_evo_inv*((1/problem.ϵ) *(infim_evo_dx_add-infim_evo))*old_cum_evo
             x_add_copy[npa] = x_add[npa] + problem.ϵ2
-            infim_evo_dx_add_array[:,:,npa] = exp(-im*dt*problem.H0(dt*(nt-1), x_main[:,nt], x_add_copy))
+            infim_evo_dx_add_array[:,:,npa] = exp(-im*dt*problem.H0(nt, x_main[:,nt], x_add_copy))
             x_add_copy[npa] = x_add[npa]
         end
 
         for ne=1:nerr
-            infim_evo_derr = exp(-im*dt*(problem.error_sources[ne].Herror(dt*(nt-1),x_main[:,nt],x_add,problem.ϵ)
-                + problem.H0(dt*(nt-1),x_main[:,nt],x_add))
+            infim_evo_derr = exp(-im*dt*(problem.error_sources[ne].Herror(nt,x_main[:,nt],x_add,problem.ϵ)
+                + problem.H0(nt,x_main[:,nt],x_add))
             )
             infimU_derr[:,:,ne,nt] = cum_evo_inv*((1/problem.ϵ) * (infim_evo_derr-infim_evo))*old_cum_evo
-            infim_evo_derr_array[:,:,ne] = exp(-im*dt*(problem.error_sources[ne].Herror(dt*(nt-1),x_main[:,nt],x_add,problem.ϵ2)
-                + problem.H0(dt*(nt-1),x_main[:,nt],x_add))
+            infim_evo_derr_array[:,:,ne] = exp(-im*dt*(problem.error_sources[ne].Herror(nt,x_main[:,nt],x_add,problem.ϵ2)
+                + problem.H0(nt,x_main[:,nt],x_add))
             )
 
             for np=1:nparam
                 x_main_copy[np] += problem.ϵ2
-                infim_evo_derr_dx = exp(-im*dt*(problem.error_sources[ne].Herror(dt*(nt-1),x_main_copy,x_add,problem.ϵ2) +
-                    problem.H0(dt*(nt-1),x_main_copy,x_add)
+                infim_evo_derr_dx = exp(-im*dt*(problem.error_sources[ne].Herror(nt,x_main_copy,x_add,problem.ϵ2) +
+                    problem.H0(nt,x_main_copy,x_add)
                 ))
                 infimU_derr_dx[:,:,np,ne,nt] = cum_evo_inv*((1/problem.ϵ2^2) * (
                     infim_evo_derr_dx + infim_evo
@@ -86,8 +86,8 @@ function calculate_unitary_and_derivatives(problem::UnitaryRobustGRAPEProblem, x
 
             for npa=1:problem.nb_additional_param
                 x_add_copy[npa] += problem.ϵ2
-                infim_evo_derr_dx_add = exp(-im*dt*(problem.error_sources[ne].Herror(dt*(nt-1),x_main[:,nt],x_add_copy,problem.ϵ2) +
-                    problem.H0(dt*(nt-1),x_main[:,nt],x_add_copy)
+                infim_evo_derr_dx_add = exp(-im*dt*(problem.error_sources[ne].Herror(nt,x_main[:,nt],x_add_copy,problem.ϵ2) +
+                    problem.H0(nt,x_main[:,nt],x_add_copy)
                 ))
                 infimU_derr_dx_add[:,:,npa,ne,nt] = cum_evo_inv*((1/problem.ϵ2^2) * (
                     infim_evo_derr_dx_add + infim_evo
@@ -193,10 +193,10 @@ function calculate_interaction_error_operators(problem::UnitaryRobustGRAPEProble
     for nt=1:ntimes
         cum_evo_inv = inv(cum_evo)
         for ne=1:nerr
-            Oerr = (1/problem.ϵ) * problem.error_sources[ne].Herror(dt*(nt-1),x_main[:,nt],x_add,problem.ϵ)
+            Oerr = (1/problem.ϵ) * problem.error_sources[ne].Herror(nt,x_main[:,nt],x_add,problem.ϵ)
             error_operators_int[:,:,ne,nt] = cum_evo_inv*Oerr*cum_evo
         end
-        infim_evo = exp(-im*dt*problem.H0(dt*(nt-1), x_main[:,nt], x_add))
+        infim_evo = exp(-im*dt*problem.H0(nt, x_main[:,nt], x_add))
         cum_evo = infim_evo*cum_evo
     end
 

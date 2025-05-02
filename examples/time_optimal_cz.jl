@@ -12,7 +12,7 @@ using Setfield
 Random.seed!(43)
 ntimes = 500
 t0 = 7.613
-H0(t,ϕ,x_add) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1],0,0)
+H0(time_step,ϕ,x_add) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1],0,0)
 cz(x_add) = cz_with_1q_phase_symmetric(x_add[1])
 
 rydberg_problem = FidelityRobustGRAPEProblem(
@@ -57,8 +57,8 @@ ax.set_ylabel("Laser phase (rad)")
 @show fig
 ##
 
-H_amplitude_error(t,ϕ,x_add,ϵ) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1],ϵ,0) - H0(t,ϕ,x_add)
-H_frequency_error(t,ϕ,x_add,δ) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1],0,δ) - H0(t,ϕ,x_add)
+H_amplitude_error(time_step,ϕ,x_add,ϵ) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1],ϵ,0) - H0(time_step,ϕ,x_add)
+H_frequency_error(time_step,ϕ,x_add,δ) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1],0,δ) - H0(time_step,ϕ,x_add)
 
 
 rydberg_problem_with_errors = (@set rydberg_problem.unitary_problem.error_sources = [
@@ -67,7 +67,7 @@ rydberg_problem_with_errors = (@set rydberg_problem.unitary_problem.error_source
 ])
 
 F, _, F_d2err, _ = calculate_fidelity_and_derivatives(rydberg_problem_with_errors,optim_pulse)
-decay_operator(t,x,x_add,ϵ) = ϵ*collect(Diagonal([0,0,0,1,1]))
+decay_operator(time_step,x,x_add,ϵ) = ϵ*collect(Diagonal([0,0,0,1,1]))
 rydberg_problem_with_decay = (@set rydberg_problem.unitary_problem.error_sources = [
     ErrorSource(decay_operator)
 ])

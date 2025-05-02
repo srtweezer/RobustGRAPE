@@ -13,8 +13,8 @@ Random.seed!(43)
 ntimes = 200
 t0_to = 7.613
 t0_ar = 14.32
-H0(t,ϕ,x_add) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1],0,0)
-H_amplitude_error(t,ϕ,x_add,ϵ) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1],ϵ,0) - H0(t,ϕ,x_add)
+H0(time_step,ϕ,x_add) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1],0,0)
+H_amplitude_error(time_step,ϕ,x_add,ϵ) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1],ϵ,0) - H0(time_step,ϕ,x_add)
 cz(x_add) = cz_with_1q_phase_symmetric(x_add[1])
 
 rydberg_problem = FidelityRobustGRAPEProblem(
@@ -71,7 +71,7 @@ ax.legend()
 @show fig
 ##
 
-H_frequency_error(t,ϕ,x_add,δ) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1],0,δ) - H0(t,ϕ,x_add)
+H_frequency_error(time_step,ϕ,x_add,δ) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1],0,δ) - H0(time_step,ϕ,x_add)
 
 rydberg_problem_with_errors = (@set rydberg_problem.unitary_problem.error_sources = [
     ErrorSource(H_amplitude_error),
@@ -86,7 +86,7 @@ rydberg_problem_with_errors_ar = (@set rydberg_problem_ar.unitary_problem.error_
 F, _, F_d2err, _ = calculate_fidelity_and_derivatives(rydberg_problem_with_errors,optim_pulse)
 F_ar, _, F_d2err_ar, _ = calculate_fidelity_and_derivatives(rydberg_problem_with_errors_ar,optim_pulse_ar)
 
-decay_operator(t,x,x_add,ϵ) = ϵ*collect(Diagonal([0,0,0,1,1]))
+decay_operator(time_step,x,x_add,ϵ) = ϵ*collect(Diagonal([0,0,0,1,1]))
 rydberg_problem_with_decay = (@set rydberg_problem.unitary_problem.error_sources = [
     ErrorSource(decay_operator)
 ])

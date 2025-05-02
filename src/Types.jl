@@ -7,7 +7,7 @@ using Optim
 Represents a source of error in the Hamiltonian.
 
 # Fields
-- `Herror::Function`: A function that returns the error Hamiltonian matrix. Signature: `Herror(time::Real, x::Vector{<:Real}, x_add::Vector{<:Real}, err::Real)`. `x` has for size the number of main parameters, `x_add` has for size the number of additional parameters.
+- `Herror::Function`: A function that returns the error Hamiltonian matrix. Signature: `Herror(time_step::Int, x::Vector{<:Real}, x_add::Vector{<:Real}, err::Real)`. `x` has for size the number of main parameters, `x_add` has for size the number of additional parameters. `time_step` is an integer between 1 and ntimes.
 """
 @with_kw struct ErrorSource
     Herror::Function
@@ -22,7 +22,7 @@ Represents a robust GRAPE unitary calculation problem.
 - `t0::Real`: Total evolution time
 - `ntimes::Int`: Number of time steps
 - `ndim::Int`: Dimension of the Hilbert space
-- `H0::Function`: Main Hamiltonian function (must return a matrix). Signature: `H0(time::Real, x::Vector{<:Real}, x_add::Vector{<:Real})``. x has for size the number of main parameters, x_add has for size the number of additional parameters.
+- `H0::Function`: Main Hamiltonian function (must return a matrix). Signature: `H0(time_step::Int, x::Vector{<:Real}, x_add::Vector{<:Real})`. `x` has for size the number of main parameters, `x_add` has for size the number of additional parameters. `time_step` is an integer between 1 and ntimes.
 - `nb_additional_param::Int`: Number of additional parameters
 - `error_sources::Vector{ErrorSource}`: List of error sources
 - `ϵ::Real = 1e-8`: Small parameter for first-order finite difference

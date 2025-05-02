@@ -22,7 +22,7 @@ x = (x_1 (t_1), x_2 (t_1), \dots, x_k (t_1), x_1 (t_2), \dots, x_k (t_n), x^{(a)
 
 where ``t_i = t_{\mathrm{tot}} \times (i/n)``, ``k`` is the number of main parameters, and ``l`` is the number of additional parameters.
 
-Therefore, our problem interface includes a Hamiltonian function that has for signature `H(t::Real,x::Vector{<:Real},x_add::Vector{<:Real}) = some matrix`, where `t` is the time, `x` is the vector of main parameters at time `t`, and `x_add` is the vector of any additional parameters. We also need to define a target unitary function `target_unitary(x_add) = some matrix`.
+Therefore, our problem interface includes a Hamiltonian function that has for signature `H(time_step::Int,x::Vector{<:Real},x_add::Vector{<:Real}) = some matrix`, where `time_step` is an integer between 1 and ntimes representing the current time step, `x` is the vector of main parameters at that time step, and `x_add` is the vector of any additional parameters. We also need to define a target unitary function `target_unitary(x_add) = some matrix`.
 
 In this example, we work with the two-atom symmetric blockaded Rydberg Hamiltonian, expressed in the ``|00\rangle, |01\rangle, |11\rangle, |0r\rangle, |W\rangle`` symmetric blockaded basis where ``|W\rangle = (|1r\rangle + |r1\rangle)/\sqrt{2}``.
 
@@ -68,8 +68,8 @@ ntimes = 500  # Number of time steps
 t0 = 7.613    # Total evolution time (in units of 1/Ω)
 
 # Define Hamiltonian and target operation
-# Hamiltonian function takes time t, control parameter ϕ and additional parameters
-H0(t, ϕ, x_add) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1], 0, 0)
+# Hamiltonian function takes time_step (integer), control parameter ϕ and additional parameters
+H0(time_step, ϕ, x_add) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1], 0, 0)
 
 # Target operation (CZ gate) with an additional phase parameter
 cz(x_add) = cz_with_1q_phase_symmetric(x_add[1])
@@ -181,7 +181,7 @@ A key feature of RobustGRAPE is the ability to analyze and optimize control puls
 The total system Hamiltonian has to be decomposed into:
 
 ```math
-H(t) = H_0(t) + H_1(\epsilon_1) + \cdots + H_{n_e}(\epsilon_{n_e})
+H(t) = H_0(t) + H_1(t, \epsilon_1) + \cdots + H_{n_e}(t, \epsilon_{n_e})
 ```
 
 where ``H_i(0) = 0``, and ``H_i(\epsilon_i)`` represents the additional Hamiltonian due to some error ``\epsilon_i``. One may also define a _noise operator_ ``O_i = \frac{\partial H_i}{\partial \epsilon_i} (0)``.
@@ -194,10 +194,10 @@ Let's define these Hamiltonians and we alter our `FidelityRobustGRAPEProblem` to
 # Define error Hamiltonians as deviations from the ideal Hamiltonian
 
 # amplitude error: variation in the Rabi frequency (sqrt of laser power)
-H_amplitude_error(t, ϕ, x_add, ϵ) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1], ϵ, 0) - H0(t, ϕ, x_add)
+H_amplitude_error(time_step, ϕ, x_add, ϵ) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1], ϵ, 0) - H0(time_step, ϕ, x_add)
 
 # Frequency error: variation in the laser detuning (in terms of angular frequency)
-H_frequency_error(t, ϕ, x_add, δ) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1], 0, δ) - H0(t, ϕ, x_add)
+H_frequency_error(time_step, ϕ, x_add, δ) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1], 0, δ) - H0(time_step, ϕ, x_add)
 
 rydberg_problem_with_errors = (@set rydberg_problem.unitary_problem.error_sources = [
     ErrorSource(H_amplitude_error),
@@ -292,7 +292,7 @@ To evaluate the sensitivity to the decay of the Rydberg states we can calculate 
 ```julia
 # Define an operator that detects population in Rydberg states
 # The [0,0,0,1,1] pattern targets the Rydberg states in our 5-level system
-decay_operator(t, x, x_add, ϵ) = ϵ*collect(Diagonal([0, 0, 0, 1, 1]))
+decay_operator(time_step, x, x_add, ϵ) = ϵ*collect(Diagonal([0, 0, 0, 1, 1]))
 
 # Update the problem to use this detection operator
 rydberg_problem_with_decay = (@set rydberg_problem.unitary_problem.error_sources = [
