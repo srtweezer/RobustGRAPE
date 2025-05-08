@@ -17,18 +17,17 @@ makeinfo = (
     modules = [RobustGRAPE],
     format = Documenter.HTML(
         prettyurls = !isempty(get(ENV, "CI", "")),
-        canonical = "https://srtweezer.github.io/RobustGRAPE.jl/stable/",
+        edit_link="https://github.com/srtweezer/RobustGRAPE",
+        repolink="https://github.com/srtweezer/RobustGRAPE",
+        canonical = "https://srtweezer.github.io/RobustGRAPE/",
         assets = [],
         sidebar_sitename = false,
     ),
-    sitename = "RobustGRAPE.jl",
+    sitename = "RobustGRAPE",
     authors = "Endres Lab",
     pages = [
         "Home" => "index.md",
-        "User Guide" => [
-            "Introduction" => "guide/introduction.md",
-            "Getting Started" => "guide/getting-started.md",
-        ],
+        "Quick start and example" => "examples.md",
         "API Reference" => [
             "Types" => "api/types.md",
             "Unitary Calculations" => "api/unitary.md",
@@ -36,17 +35,16 @@ makeinfo = (
             "Regularization" => "api/regularization.md",
             "Rydberg Tools" => "api/rydberg.md",
         ],
-        "Examples" => "examples.md",
     ],
-    repo = "https://github.com/srtweezer/RobustGRAPE.jl/blob/{commit}{path}#L{line}",
     warnonly = true
 )
 
 Documenter.makedocs(; makeinfo...)
 
-# Uncomment this when ready to deploy to GitHub Pages
+# Deploy documentation to GitHub Pages
 Documenter.deploydocs(
-    repo = "github.com/srtweezer/RobustGRAPE.jl.git",
-    devbranch = "main",
+    repo = "github.com/srtweezer/RobustGRAPE.git",
+    devbranch = "stable",
+    target = "build",
     push_preview = true,
 )

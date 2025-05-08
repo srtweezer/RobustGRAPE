@@ -19,8 +19,8 @@ end
 # Ensure the docs project environment is activated and packages are installed
 import Pkg
 Pkg.activate(pkg_path)
+Pkg.resolve()
 Pkg.instantiate()
-#Pkg.activate(joinpath(pkg_path, "docs"))
 
 # Develop the main package from the current directory
 #Pkg.develop(path=pkg_path)
@@ -32,6 +32,7 @@ catch e
     @warn "Failed to load RobustGRAPE normally, trying direct include" exception=e
     # If loading fails, try to include the module directly
     include(joinpath(pkg_path, "src", "RobustGRAPE.jl"))
+    @eval using Main.RobustGRAPE
 end
 
 # Build the documentation

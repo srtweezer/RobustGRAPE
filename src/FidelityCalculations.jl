@@ -12,9 +12,9 @@ Calculate the fidelity between the evolved unitary and target unitary, along wit
 # Returns
 A tuple with:
 - `F`: The fidelity value
-- `F_dx_tot`: Combined derivatives with respect to all control parameters (both main and additional)
+- `F_dx`: Combined derivatives with respect to all control parameters (both main and additional)
 - `F_d2err`: Second derivatives with respect to error sources
-- `F_d2err_dx_tot`: Combined mixed derivatives for error and all control parameters
+- `F_d2err_dx`: Combined mixed derivatives for error and all control parameters
 """
 function calculate_fidelity_and_derivatives(fidelity_problem::FidelityRobustGRAPEProblem, x::Vector{<:Real})
     unitary_problem = fidelity_problem.unitary_problem
@@ -178,10 +178,8 @@ function optimize_fidelity_and_error_sources(fidelity_problem::FidelityRobustGRA
             buffer[1] = 1-F
             buffer[2:end] = - F_dx
             if size(F_d2err,1) > 0
-                buffer[1] += sum(fidelity_parameters.error_source_coeff .* Real,F_d2err .^ 2)
-                F_d2err_squared = 2 * sum(convert.(Real,
-                    reshape(fidelity_parameters.error_source_coeff .* F_d2err,1,nerr) .* F_d2err_dx
-                ),dims=2)[:,1]
+                buffer[1] += sum(fidelity_parameters.error_source_coeff .* F_d2err .^ 2)
+                F_d2err_squared = 2 * sum(reshape(fidelity_parameters.error_source_coeff .* F_d2err,1,nerr) .* F_d2err_dx, dims=2)[:,1]
                 buffer[2:end] .+= F_d2err_squared
             end
 

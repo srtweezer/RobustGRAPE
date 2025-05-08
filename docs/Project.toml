@@ -3,7 +3,7 @@ uuid = "a8865623-b8c1-4e22-b098-9f577306bee1"
 
 [deps]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
-RobustGRAPE = "1cec81ba-7d24-4e62-932b-6e64af348517"
+RobustGRAPE = "224d2c9b-d737-4b5f-bb5f-4927402d00fb"
 
 [compat]
-Documenter = "1.0"
+Documenter = "0.27, 1"

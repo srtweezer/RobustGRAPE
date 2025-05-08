@@ -11,6 +11,7 @@ Manifest.toml
 
 # Julia package manager
 .julia/
+/internal/
 
 # Build artifacts
 *.o
@@ -33,7 +34,6 @@ Manifest.toml
 
 # Output files
 *.pdf
-*.png
 *.svg
 *.gif
 *.log

@@ -70,7 +70,7 @@ end
                     ErrorSource(Herror=Herror)
                 ]
             ),
-            projector=Diagonal([1,2,1,0,0]),  # Projector onto computational subspace with factor 2 for |01⟩
+            projector=collect(Diagonal([1,2,1,0,0])),  # Projector onto computational subspace with factor 2 for |01⟩
             target_unitary=cz
         )
         
@@ -153,7 +153,7 @@ end
                 nb_additional_param=1,
                 error_sources=[]
             ),
-            projector=Diagonal([1,2,1,0,0]),  # Corrected with factor 2 for |01⟩
+            projector=collect(Diagonal([1,2,1,0,0])),  # Corrected with factor 2 for |01⟩
             target_unitary=cz
         )
 
@@ -186,7 +186,7 @@ end
                 nb_additional_param=1,
                 error_sources=[]
             ),
-            projector=Diagonal([1,2,1,0,0]),  # Corrected with factor 2 for |01⟩
+            projector=collect(Diagonal([1,2,1,0,0])),  # Corrected with factor 2 for |01⟩
             target_unitary=cz
         )
         
@@ -242,7 +242,7 @@ end
                 nb_additional_param=1,
                 error_sources=[]
             ),
-            projector=Diagonal([1,2,1,0,0]),  # Corrected with factor 2 for |01⟩
+            projector=collect(Diagonal([1,2,1,0,0])),  # Corrected with factor 2 for |01⟩
             target_unitary=cz
         )
         
@@ -255,7 +255,7 @@ end
                 nb_additional_param=1,
                 error_sources=[]
             ),
-            projector=Diagonal([1,2,1,0,0]),  # Corrected with factor 2 for |01⟩
+            projector=collect(Diagonal([1,2,1,0,0])),  # Corrected with factor 2 for |01⟩
             target_unitary=cz
         )
         
@@ -271,7 +271,7 @@ end
                     ErrorSource(Herror=Herror)
                 ]
             ),
-            projector=Diagonal([1,2,1,0,0]),  # Corrected with factor 2 for |01⟩
+            projector=collect(Diagonal([1,2,1,0,0])),  # Corrected with factor 2 for |01⟩
             target_unitary=cz
         )
         
@@ -314,7 +314,7 @@ end
                 nb_additional_param=1,
                 error_sources=[]
             ),
-            projector=Diagonal([1,2,1,0,0]),  # Corrected with factor 2 for |01⟩
+            projector=collect(Diagonal([1,2,1,0,0])),  # Corrected with factor 2 for |01⟩
             target_unitary=cz
         )
         
@@ -376,7 +376,7 @@ end
                 nb_additional_param=1,
                 error_sources=[]
             ),
-            projector=Diagonal([1,2,1,0,0]),  # Corrected with factor 2 for |01⟩
+            projector=collect(Diagonal([1,2,1,0,0])),  # Corrected with factor 2 for |01⟩
             target_unitary=cz
         )
         
@@ -437,7 +437,7 @@ end
                 nb_additional_param=1,
                 error_sources=[]
             ),
-            projector=Diagonal([1,2,1,0,0]),  # Corrected with factor 2 for |01⟩
+            projector=collect(Diagonal([1,2,1,0,0])),  # Corrected with factor 2 for |01⟩
             target_unitary=cz_sym
         )
         
@@ -489,7 +489,7 @@ end
                     ErrorSource(Herror=H_frequency_error_full)
                 ]
             ),
-            projector=Diagonal([1,1,1,1,0,0,0]),  # Projector for the full model
+            projector=collect(Diagonal([1,1,1,1,0,0,0])),  # Projector for the full model
             target_unitary=cz_full
         )
         
@@ -510,7 +510,7 @@ end
                     ErrorSource(Herror=H_frequency_error_sym)
                 ]
             ),
-            projector=Diagonal([1,2,1,0,0]),  # Corrected with factor 2 for |01⟩
+            projector=collect(Diagonal([1,2,1,0,0])),  # Corrected with factor 2 for |01⟩
             target_unitary=cz_sym
         )
         
@@ -556,7 +556,7 @@ end
                 nb_additional_param=1,
                 error_sources=[]
             ),
-            projector=Diagonal([1,2,1,0,0]),  # Corrected with factor 2 for |01⟩
+            projector=collect(Diagonal([1,2,1,0,0])),  # Corrected with factor 2 for |01⟩
             target_unitary=cz_sym
         )
         
@@ -597,7 +597,7 @@ end
                     ErrorSource(Herror=H_frequency_error_sym)
                 ]
             ),
-            projector=Diagonal([1,2,1,0,0]),  # Corrected with factor 2 for |01⟩
+            projector=collect(Diagonal([1,2,1,0,0])),  # Corrected with factor 2 for |01⟩
             target_unitary=cz_sym
         )
         
