@@ -5,45 +5,6 @@ using Test
 using Random
 using Optim
 
-# Helper function for phase regularization
-function regularization_cost_phase(x)
-    # Compute phase difference, handling 2π periodicity
-    diff_x = diff(x)
-    diff_diff_x = diff(diff_x)
-    
-    # First and second order regularization
-    reg1 = sum(sin.(diff_x/2).^2)
-    reg2 = sum(sin.(diff_diff_x/2).^2)
-    
-    # Gradients
-    n = length(x)
-    jac1 = zeros(n)
-    jac2 = zeros(n)
-    
-    for i in 1:n-1
-        if i < n-1
-            jac1[i] -= 0.5*sin(diff_x[i])
-        end
-        if i > 1
-            jac1[i] += 0.5*sin(diff_x[i-1])
-        end
-    end
-    
-    for i in 1:n
-        if i < n-2
-            jac2[i] -= 0.5*sin(diff_diff_x[i])
-        end
-        if i > 1 && i < n-1
-            jac2[i] += sin(diff_diff_x[i-1])
-        end
-        if i > 2
-            jac2[i] -= 0.5*sin(diff_diff_x[i-2])
-        end
-    end
-    
-    return reg1, jac1, reg2, jac2
-end
-
 @testset "RobustGRAPE.jl" begin
     @testset "Error sensitivity gradient validation for CZ gate" begin
         println("[TEST] Validating error sensitivity gradient for CZ gate...")

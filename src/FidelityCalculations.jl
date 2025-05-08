@@ -30,7 +30,7 @@ function calculate_fidelity_and_derivatives(fidelity_problem::FidelityRobustGRAP
     x_add = x[end-nb_additional_param+1:end]
 
     U0 = fidelity_problem.target_unitary(x_add)
-    U0_dx_add = zeros(Complex,ndim,ndim,nb_additional_param)
+    U0_dx_add = zeros(typeof(U0[1,1]),ndim,ndim,nb_additional_param)
     x_add_copy = copy(x_add)
     for npa=1:nb_additional_param
         x_add_copy[npa] += unitary_problem.ϵ
@@ -44,13 +44,12 @@ function calculate_fidelity_and_derivatives(fidelity_problem::FidelityRobustGRAP
     F_d2err_dx = zeros(Real, nparam, ntimes, nerr)
     F_d2err_dx_add = zeros(Real, nb_additional_param, nerr)
     
-    P0 = convert.(Complex,fidelity_problem.projector)
+    P0 = convert.(typeof(U0[1,1]),fidelity_problem.projector)
     tr_mod(A) = tr(P0*A)
     P = copy(P0)
     P[P .!= 0] .= 1
     D = real(tr(P0))
 
-    
     F = (real(tr_mod(P * U0' * U * P * U' * U0)) + abs(tr_mod(P * U0' * U))^2)/(D*(D+1))
 
     for nt=1:ntimes
@@ -192,7 +191,7 @@ function optimize_fidelity_and_error_sources(fidelity_problem::FidelityRobustGRA
                 reg_costs_grad[np,:] = fidelity_parameters.regularization_coeff1[np]*j1+fidelity_parameters.regularization_coeff2[np]*j2
             end
             buffer[1] += sum(reg_costs_tot)
-            buffer[2:end-nb_additional_param] += sum(reg_costs_grad,dims=1)[1,:]
+            buffer[2:end-nb_additional_param] += reshape(reg_costs_grad,nparam*ntimes)
         end
     end
     
@@ -252,7 +251,7 @@ function calculate_fidelity_response(fidelity_problem::FidelityRobustGRAPEProble
     nfreq = size(normalized_frequencies,1)
     dt = fidelity_problem.unitary_problem.t0/ntimes
     error_operators_int = calculate_interaction_error_operators(unitary_problem, x)
-    P0 = convert.(Complex,fidelity_problem.projector)
+    P0 = convert.(Complex{typeof(x[1])},fidelity_problem.projector)
     tr_mod(A) = tr(P0*A)
     P = copy(P0)
     P[P .!= 0] .= 1
@@ -312,12 +311,12 @@ function calculate_fidelity_response_fft(fidelity_problem::FidelityRobustGRAPEPr
 
     dt = fidelity_problem.unitary_problem.t0/ntimes
     error_operators_int = calculate_interaction_error_operators(unitary_problem, x)
-    error_operators_int = convert.(ComplexF64,error_operators_int)
+    error_operators_int = convert.(Complex{typeof(x[1])},error_operators_int)
 
-    zero_pad = zeros(ComplexF64,ndim,ndim,ntimes*(oversampling-1),nerr)
+    zero_pad = zeros(Complex{typeof(x[1])},ndim,ndim,ntimes*(oversampling-1),nerr)
     error_operators_int = cat(error_operators_int,zero_pad;dims=3)
     # (ndim,ndim,ntimes,nerr)
-    P0 = convert.(Complex,fidelity_problem.projector)
+    P0 = convert.(Complex{typeof(x[1])},fidelity_problem.projector)
     tr_mod(A) = tr(P0*A)
     P = copy(P0)
     P[P .!= 0] .= 1
@@ -375,7 +374,7 @@ function calculate_expectation_values(fidelity_problem::FidelityRobustGRAPEProbl
     exp_values = zeros(Real,ntimes,nerr)
     dt = unitary_problem.t0/ntimes
 
-    P0 = convert.(Complex,fidelity_problem.projector)
+    P0 = convert.(Complex{typeof(x[1])},fidelity_problem.projector)
     tr_mod(A) = tr(P0*A)
     P = copy(P0)
     P[P .!= 0] .= 1

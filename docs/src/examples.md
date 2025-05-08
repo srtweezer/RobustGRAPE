@@ -59,6 +59,7 @@ using LinearAlgebra
 using Optim
 using Random
 using Setfield
+using FunctionWrappers: FunctionWrapper
 
 # Set random seed for reproducibility
 Random.seed!(43)
@@ -69,10 +70,16 @@ t0 = 7.613    # Total evolution time (in units of 1/Ω)
 
 # Define Hamiltonian and target operation
 # Hamiltonian function takes time_step (integer), control parameter ϕ and additional parameters
-H0(time_step, ϕ, x_add) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1], 0, 0)
+# First define the function
+H0_func(time_step, ϕ, x_add) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1], 0, 0)
+# Then wrap it for better performance
+H0 = HamiltonianFunctionWrapper(H0_func)
 
 # Target operation (CZ gate) with an additional phase parameter
-cz(x_add) = cz_with_1q_phase_symmetric(x_add[1])
+# First define the function
+cz_func(x_add) = cz_with_1q_phase_symmetric(x_add[1])
+# Then wrap it for better performance
+cz = UnitaryFunctionWrapper(cz_func)
 ```
 
 Here, `rydberg_hamiltonian_symmetric_blockaded` represents the above Hamiltonian. We set the intensity and detuning errors (respectively, ``\epsilon`` and ``\delta``) to zero.
@@ -123,8 +130,8 @@ rydberg_cz_parameters = FidelityRobustGRAPEParameters(
     # Initial control pulse: small random values for the time steps + random phase
     x_initial = [2*π*0.001*rand(ntimes); 2*π*rand()],
     
-    # Use phase regularization to ensure smooth pulses
-    regularization_functions = [regularization_cost_phase],
+    # Use wrapped regularization function for better performance
+    regularization_functions = [regularization_cost_phase_wrapped],
     regularization_coeff1=[1e-7],  # First derivative regularization weight
     regularization_coeff2=[1e-7],  # Second derivative regularization weight
     
@@ -193,11 +200,16 @@ Let's define these Hamiltonians and we alter our `FidelityRobustGRAPEProblem` to
 ```julia
 # Define error Hamiltonians as deviations from the ideal Hamiltonian
 
+# First define the error Hamiltonian functions
 # amplitude error: variation in the Rabi frequency (sqrt of laser power)
-H_amplitude_error(time_step, ϕ, x_add, ϵ) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1], ϵ, 0) - H0(time_step, ϕ, x_add)
+H_amplitude_error_func(time_step, ϕ, x_add, ϵ) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1], ϵ, 0) - H0(time_step, ϕ, x_add)
 
 # Frequency error: variation in the laser detuning (in terms of angular frequency)
-H_frequency_error(time_step, ϕ, x_add, δ) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1], 0, δ) - H0(time_step, ϕ, x_add)
+H_frequency_error_func(time_step, ϕ, x_add, δ) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1], 0, δ) - H0(time_step, ϕ, x_add)
+
+# Then wrap them for better performance
+H_amplitude_error = ErrorHamiltonianFunctionWrapper(H_amplitude_error_func)
+H_frequency_error = ErrorHamiltonianFunctionWrapper(H_frequency_error_func)
 
 rydberg_problem_with_errors = (@set rydberg_problem.unitary_problem.error_sources = [
     ErrorSource(H_amplitude_error),
@@ -292,7 +304,10 @@ To evaluate the sensitivity to the decay of the Rydberg states we can calculate 
 ```julia
 # Define an operator that detects population in Rydberg states
 # The [0,0,0,1,1] pattern targets the Rydberg states in our 5-level system
-decay_operator(time_step, x, x_add, ϵ) = ϵ*collect(Diagonal([0, 0, 0, 1, 1]))
+decay_operator_func(time_step, x, x_add, ϵ) = ϵ*collect(Diagonal([0, 0, 0, 1, 1]))
+
+# Wrap it for better performance
+decay_operator = ErrorHamiltonianFunctionWrapper(decay_operator_func)
 
 # Update the problem to use this detection operator
 rydberg_problem_with_decay = (@set rydberg_problem.unitary_problem.error_sources = [

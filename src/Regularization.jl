@@ -113,3 +113,13 @@ function regularization_cost_phase(ϕs::Vector{<:Real})
     reg1_sin, jac1_sin, reg2_sin, jac2_sin = regularization_cost(ϕs, x-> sin(x), x-> cos(x))
     return reg1_cos+reg1_sin,jac1_cos+jac1_sin,reg2_cos+reg2_sin,jac2_cos+jac2_sin
 end
+
+# Create FunctionWrapper versions of regularization functions
+using FunctionWrappers: FunctionWrapper
+
+# Import the type alias from Types.jl
+using .RobustGRAPE: RegularizationFunctionWrapper
+
+# Convert existing functions to FunctionWrappers for better performance
+const regularization_cost_wrapped = RegularizationFunctionWrapper(regularization_cost)
+const regularization_cost_phase_wrapped = RegularizationFunctionWrapper(regularization_cost_phase)

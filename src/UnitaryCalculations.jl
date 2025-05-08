@@ -31,15 +31,15 @@ function calculate_unitary_and_derivatives(problem::UnitaryRobustGRAPEProblem, x
     ndim = problem.ndim
     nerr = size(problem.error_sources,1)
 
-    infimU_dx = zeros(Complex,ndim,ndim,nparam,ntimes)
-    infimU_dx_add = zeros(Complex,ndim,ndim,problem.nb_additional_param,ntimes)
-    infimU_derr = zeros(Complex,ndim,ndim,nerr,ntimes)
-    infimU_derr_dx = zeros(Complex,ndim,ndim,nparam,nerr,ntimes)
-    infimU_derr_dx_add = zeros(Complex,ndim,ndim,problem.nb_additional_param,nerr,ntimes)
+    infimU_dx = zeros(Complex{typeof(x[1])},ndim,ndim,nparam,ntimes)
+    infimU_dx_add = zeros(Complex{typeof(x[1])},ndim,ndim,problem.nb_additional_param,ntimes)
+    infimU_derr = zeros(Complex{typeof(x[1])},ndim,ndim,nerr,ntimes)
+    infimU_derr_dx = zeros(Complex{typeof(x[1])},ndim,ndim,nparam,nerr,ntimes)
+    infimU_derr_dx_add = zeros(Complex{typeof(x[1])},ndim,ndim,problem.nb_additional_param,nerr,ntimes)
 
-    infim_evo_derr_array = zeros(Complex,ndim,ndim,nerr)
-    infim_evo_dx_array = zeros(Complex,ndim,ndim,nparam)
-    infim_evo_dx_add_array = zeros(Complex,ndim,ndim,problem.nb_additional_param)
+    infim_evo_derr_array = zeros(Complex{typeof(x[1])},ndim,ndim,nerr)
+    infim_evo_dx_array = zeros(Complex{typeof(x[1])},ndim,ndim,nparam)
+    infim_evo_dx_add_array = zeros(Complex{typeof(x[1])},ndim,ndim,problem.nb_additional_param)
 
     for nt=1:ntimes
         infim_evo = exp(-im*dt*problem.H0(nt, x_main[:,nt], x_add))
@@ -103,11 +103,11 @@ function calculate_unitary_and_derivatives(problem::UnitaryRobustGRAPEProblem, x
     infimU_derr_dx = permutedims(infimU_derr_dx, (1,2,3,5,4))
     infimU_derr_dx_add = permutedims(infimU_derr_dx_add, (1,2,3,5,4))
 
-    U_dx = zeros(Complex,ndim,ndim,nparam,ntimes)
-    U_dx_add = zeros(Complex,ndim,ndim,problem.nb_additional_param)
-    U_derr = zeros(Complex,ndim,ndim,nerr)
-    U_derr_dx = zeros(Complex,ndim,ndim,nparam,ntimes,nerr)
-    U_derr_dx_add = zeros(Complex,ndim,ndim,problem.nb_additional_param,nerr)
+    U_dx = zeros(Complex{typeof(x[1])},ndim,ndim,nparam,ntimes)
+    U_dx_add = zeros(Complex{typeof(x[1])},ndim,ndim,problem.nb_additional_param)
+    U_derr = zeros(Complex{typeof(x[1])},ndim,ndim,nerr)
+    U_derr_dx = zeros(Complex{typeof(x[1])},ndim,ndim,nparam,ntimes,nerr)
+    U_derr_dx_add = zeros(Complex{typeof(x[1])},ndim,ndim,problem.nb_additional_param,nerr)
 
     infimU_derr_cumsum = cumsum(infimU_derr,dims=3)
     infimU_derr_revcumsum = reverse(cumsum(reverse(infimU_derr,dims=3),dims=3),dims=3)
@@ -189,7 +189,7 @@ function calculate_interaction_error_operators(problem::UnitaryRobustGRAPEProble
     ndim = problem.ndim
     nerr = size(problem.error_sources,1)
 
-    error_operators_int = zeros(Complex,ndim,ndim,nerr,ntimes)
+    error_operators_int = zeros(Complex{typeof(x[1])},ndim,ndim,nerr,ntimes)
     for nt=1:ntimes
         cum_evo_inv = inv(cum_evo)
         for ne=1:nerr

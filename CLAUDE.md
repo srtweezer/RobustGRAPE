@@ -13,9 +13,21 @@ Key features:
 
 ## Important Interface Changes
 - **Hamiltonian and error functions now use `time_step::Int` instead of `time::Real`**
+- **All functions are now wrapped with `FunctionWrappers.jl` for improved performance**
 - Function signatures are:
   - `H0(time_step::Int, x::Vector{<:Real}, x_add::Vector{<:Real})`
   - `Herror(time_step::Int, x::Vector{<:Real}, x_add::Vector{<:Real}, err::Real)`
+
+## Function Wrapper Types
+The package now uses the following function wrapper types for better performance:
+- `HamiltonianFunctionWrapper`: For Hamiltonian functions - `H0(time_step, x, x_add)`
+- `ErrorHamiltonianFunctionWrapper`: For error Hamiltonian functions - `Herror(time_step, x, x_add, err)`
+- `RegularizationFunctionWrapper`: For regularization functions
+- `UnitaryFunctionWrapper`: For target unitary functions - `target_unitary(x_add)`
+
+Use wrapped versions of provided functions for best performance:
+- `regularization_cost_wrapped` instead of `regularization_cost`
+- `regularization_cost_phase_wrapped` instead of `regularization_cost_phase`
 
 ## Core Types
 - `ErrorSource`: Represents a source of error in the Hamiltonian

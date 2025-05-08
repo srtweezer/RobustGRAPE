@@ -158,7 +158,7 @@ The diagonal structure encodes a CZ gate with additional single-qubit phase rota
 - Diagonal matrix representing the CZ gate with phase rotations
 """
 function cz_with_1q_phase_symmetric(θ::Real)
-    return Diagonal([1,exp(im*θ),exp(im*(2*θ+π)),0,0])
+    return collect(ComplexF64,Diagonal([1,exp(im*θ),exp(im*(2*θ+π)),0,0]))
 end
 
 """    
@@ -195,11 +195,11 @@ The diagonal structure encodes a CZ gate with additional single-qubit phase rota
 - Diagonal matrix representing the CZ gate with phase rotations in the full basis
 """
 function cz_with_1q_phase_full(θ::Real; rydberg_dimension::Int = 5)
-    diag_vec = zeros(Complex,4+rydberg_dimension)
+    diag_vec = zeros(Complex{typeof(x[1])},4+rydberg_dimension)
     diag_vec[1] = 1
     diag_vec[2:3] .= exp(im*θ)
     diag_vec[4] = exp(im*(2*θ+π))
-    return Diagonal(diag_vec)
+    return collect.(ComplexF64,Diagonal(diag_vec))
 end
 
 
