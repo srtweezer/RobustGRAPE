@@ -44,7 +44,7 @@ Documenter.makedocs(; makeinfo...)
 # Deploy documentation to GitHub Pages
 Documenter.deploydocs(
     repo = "github.com/srtweezer/RobustGRAPE.git",
-    devbranch = "main",
+    devbranch = "stable",
     target = "build",
     push_preview = true,
 )
