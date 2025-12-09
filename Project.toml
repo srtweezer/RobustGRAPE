@@ -20,7 +20,7 @@ Documenter = "0.27, 1"
 Einsum = "0.4"
 FFTW = "1"
 FunctionWrappers = "1"
-Optim = "1"
+Optim = "1.12"
 Parameters = "0.12"
 Setfield = "0.8, 1"
 
