@@ -42,41 +42,50 @@ function calculate_unitary_and_derivatives(problem::UnitaryRobustGRAPEProblem, x
     infim_evo_dx_add_array = zeros(Complex,ndim,ndim,problem.nb_additional_param)
 
     for nt=1:ntimes
-        infim_evo = exp(-im*dt*problem.H0(nt, x_main[:,nt], x_add))
+        # Fix 4: Cache base H0 evaluation
+        H0_base = problem.H0(nt, @view(x_main[:,nt]), x_add)
+        infim_evo = exp(-im * dt * H0_base)
         cum_evo = infim_evo*cum_evo
-        cum_evo_inv = inv(cum_evo)
-        x_main_copy = copy(x_main[:,nt])
+        cum_evo_inv = cum_evo'  # Fix 1: adjoint instead of inv
+
+        x_main_copy = copy(@view(x_main[:,nt]))
+        # Fix 4: Cache ϵ2-perturbed H0 values for reuse in error cross-derivatives
+        H0_dx_cache = Vector{Any}(undef, nparam)
         for np=1:nparam
             x_main_copy[np] += problem.ϵ
-            infim_evo_dx = exp(-im*dt*problem.H0(nt, x_main_copy, x_add))
+            infim_evo_dx = exp(-im * dt * problem.H0(nt, x_main_copy, x_add))
             infimU_dx[:,:,np,nt] = cum_evo_inv*((1/problem.ϵ) *(infim_evo_dx-infim_evo))*old_cum_evo
             x_main_copy[np] = x_main[np,nt] + problem.ϵ2
-            infim_evo_dx_array[:,:,np] = exp(-im*dt*problem.H0(nt, x_main_copy, x_add))
+            H0_dx_cache[np] = problem.H0(nt, x_main_copy, x_add)
+            infim_evo_dx_array[:,:,np] = exp(-im * dt * H0_dx_cache[np])
             x_main_copy[np] = x_main[np,nt]
         end
+
+        # Fix 4: Cache ϵ2-perturbed H0 values for additional params
+        H0_dx_add_cache = Vector{Any}(undef, problem.nb_additional_param)
         for npa=1:problem.nb_additional_param
             x_add_copy[npa] += problem.ϵ
-            infim_evo_dx_add = exp(-im*dt*problem.H0(nt, x_main[:,nt], x_add_copy))
+            infim_evo_dx_add = exp(-im * dt * problem.H0(nt, @view(x_main[:,nt]), x_add_copy))
             infimU_dx_add[:,:,npa,nt] = cum_evo_inv*((1/problem.ϵ) *(infim_evo_dx_add-infim_evo))*old_cum_evo
             x_add_copy[npa] = x_add[npa] + problem.ϵ2
-            infim_evo_dx_add_array[:,:,npa] = exp(-im*dt*problem.H0(nt, x_main[:,nt], x_add_copy))
+            H0_dx_add_cache[npa] = problem.H0(nt, @view(x_main[:,nt]), x_add_copy)
+            infim_evo_dx_add_array[:,:,npa] = exp(-im * dt * H0_dx_add_cache[npa])
             x_add_copy[npa] = x_add[npa]
         end
 
         for ne=1:nerr
-            infim_evo_derr = exp(-im*dt*(problem.error_sources[ne].Herror(nt,x_main[:,nt],x_add,problem.ϵ)
-                + problem.H0(nt,x_main[:,nt],x_add))
-            )
+            # Fix 4: Reuse H0_base instead of calling H0 again
+            infim_evo_derr = exp(-im * dt * (
+                problem.error_sources[ne].Herror(nt, @view(x_main[:,nt]), x_add, problem.ϵ) + H0_base))
             infimU_derr[:,:,ne,nt] = cum_evo_inv*((1/problem.ϵ) * (infim_evo_derr-infim_evo))*old_cum_evo
-            infim_evo_derr_array[:,:,ne] = exp(-im*dt*(problem.error_sources[ne].Herror(nt,x_main[:,nt],x_add,problem.ϵ2)
-                + problem.H0(nt,x_main[:,nt],x_add))
-            )
+            infim_evo_derr_array[:,:,ne] = exp(-im * dt * (
+                problem.error_sources[ne].Herror(nt, @view(x_main[:,nt]), x_add, problem.ϵ2) + H0_base))
 
             for np=1:nparam
                 x_main_copy[np] += problem.ϵ2
-                infim_evo_derr_dx = exp(-im*dt*(problem.error_sources[ne].Herror(nt,x_main_copy,x_add,problem.ϵ2) +
-                    problem.H0(nt,x_main_copy,x_add)
-                ))
+                # Fix 4: Reuse H0_dx_cache[np] instead of calling H0 again
+                infim_evo_derr_dx = exp(-im * dt * (
+                    problem.error_sources[ne].Herror(nt, x_main_copy, x_add, problem.ϵ2) + H0_dx_cache[np]))
                 infimU_derr_dx[:,:,np,ne,nt] = cum_evo_inv*((1/problem.ϵ2^2) * (
                     infim_evo_derr_dx + infim_evo
                     - infim_evo_derr_array[:,:,ne] - infim_evo_dx_array[:,:,np]
@@ -86,9 +95,9 @@ function calculate_unitary_and_derivatives(problem::UnitaryRobustGRAPEProblem, x
 
             for npa=1:problem.nb_additional_param
                 x_add_copy[npa] += problem.ϵ2
-                infim_evo_derr_dx_add = exp(-im*dt*(problem.error_sources[ne].Herror(nt,x_main[:,nt],x_add_copy,problem.ϵ2) +
-                    problem.H0(nt,x_main[:,nt],x_add_copy)
-                ))
+                # Fix 4: Reuse H0_dx_add_cache[npa] instead of calling H0 again
+                infim_evo_derr_dx_add = exp(-im * dt * (
+                    problem.error_sources[ne].Herror(nt, @view(x_main[:,nt]), x_add_copy, problem.ϵ2) + H0_dx_add_cache[npa]))
                 infimU_derr_dx_add[:,:,npa,ne,nt] = cum_evo_inv*((1/problem.ϵ2^2) * (
                     infim_evo_derr_dx_add + infim_evo
                     - infim_evo_derr_array[:,:,ne] - infim_evo_dx_add_array[:,:,npa]
@@ -159,11 +168,6 @@ end
 
 Calculate the interaction picture representation of error operators at each time step.
 
-This function transforms error operators from the Schrödinger picture to the interaction picture,
-which is essential for analyzing how errors affect the quantum dynamics throughout the evolution.
-The interaction picture provides a way to separate the influence of the control Hamiltonian from
-the error terms.
-
 # Parameters
 - `problem::UnitaryRobustGRAPEProblem`: The robust GRAPE problem definition
 - `x::Vector{<:Real}`: The optimization vector containing control parameters and additional parameters
@@ -171,11 +175,6 @@ the error terms.
 # Returns
 - A tensor of dimensions (ndim, ndim, ntimes, nerr) containing the interaction picture
   representation of each error operator at each time step.
-
-# Notes
-- The interaction picture transformation uses the cumulative evolution operator
-- Error operators are scaled by the small parameter ϵ used for numerical differentiation
-- The returned tensor has dimensions permuted for convenient access to time-dependent error operators
 """
 function calculate_interaction_error_operators(problem::UnitaryRobustGRAPEProblem, x::Vector{<:Real})
     x_main = x[1:end-problem.nb_additional_param]
@@ -191,12 +190,12 @@ function calculate_interaction_error_operators(problem::UnitaryRobustGRAPEProble
 
     error_operators_int = zeros(Complex,ndim,ndim,nerr,ntimes)
     for nt=1:ntimes
-        cum_evo_inv = inv(cum_evo)
+        cum_evo_inv = cum_evo'  # Fix 1: adjoint instead of inv
         for ne=1:nerr
-            Oerr = (1/problem.ϵ) * problem.error_sources[ne].Herror(nt,x_main[:,nt],x_add,problem.ϵ)
+            Oerr = (1/problem.ϵ) * problem.error_sources[ne].Herror(nt, @view(x_main[:,nt]), x_add, problem.ϵ)
             error_operators_int[:,:,ne,nt] = cum_evo_inv*Oerr*cum_evo
         end
-        infim_evo = exp(-im*dt*problem.H0(nt, x_main[:,nt], x_add))
+        infim_evo = exp(-im * dt * problem.H0(nt, @view(x_main[:,nt]), x_add))
         cum_evo = infim_evo*cum_evo
     end
 

@@ -2,6 +2,50 @@ using Parameters
 using Optim
 
 """
+    HamiltonianFunctionWrapper
+
+Callable wrapper for Hamiltonian functions.
+Signature: `(time_step::Int, x::AbstractVector{<:Real}, x_add::AbstractVector{<:Real}) -> Matrix`
+"""
+struct HamiltonianFunctionWrapper <: Function
+    f::Function
+end
+(w::HamiltonianFunctionWrapper)(args...) = w.f(args...)
+
+"""
+    ErrorHamiltonianFunctionWrapper
+
+Callable wrapper for error Hamiltonian functions.
+Signature: `(time_step::Int, x::AbstractVector{<:Real}, x_add::AbstractVector{<:Real}, err::Real) -> Matrix`
+"""
+struct ErrorHamiltonianFunctionWrapper <: Function
+    f::Function
+end
+(w::ErrorHamiltonianFunctionWrapper)(args...) = w.f(args...)
+
+"""
+    UnitaryFunctionWrapper
+
+Callable wrapper for target unitary functions.
+Signature: `(x_add::AbstractVector{<:Real}) -> Matrix`
+"""
+struct UnitaryFunctionWrapper <: Function
+    f::Function
+end
+(w::UnitaryFunctionWrapper)(args...) = w.f(args...)
+
+"""
+    RegularizationFunctionWrapper
+
+Callable wrapper for regularization functions.
+Signature: `(x::AbstractVector{<:Real}) -> (r1, j1, r2, j2)`
+"""
+struct RegularizationFunctionWrapper <: Function
+    f::Function
+end
+(w::RegularizationFunctionWrapper)(args...) = w.f(args...)
+
+"""
     ErrorSource
 
 Represents a source of error in the Hamiltonian.

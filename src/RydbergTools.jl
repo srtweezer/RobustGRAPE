@@ -195,7 +195,7 @@ The diagonal structure encodes a CZ gate with additional single-qubit phase rota
 - Diagonal matrix representing the CZ gate with phase rotations in the full basis
 """
 function cz_with_1q_phase_full(θ::Real; rydberg_dimension::Int = 5)
-    diag_vec = zeros(Complex,4+rydberg_dimension)
+    diag_vec = zeros(ComplexF64,4+rydberg_dimension)
     diag_vec[1] = 1
     diag_vec[2:3] .= exp(im*θ)
     diag_vec[4] = exp(im*(2*θ+π))
