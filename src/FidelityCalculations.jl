@@ -209,7 +209,7 @@ function optimize_fidelity_and_error_sources(fidelity_problem::FidelityRobustGRA
                 reg_costs_grad[np,:] = fidelity_parameters.regularization_coeff1[np]*j1+fidelity_parameters.regularization_coeff2[np]*j2
             end
             buffer[1] += sum(reg_costs_tot)
-            buffer[2:end-nb_additional_param] += sum(reg_costs_grad,dims=1)[1,:]
+            buffer[2:end-nb_additional_param] .+= vec(reg_costs_grad)
         end
     end
     
