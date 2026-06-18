@@ -9,6 +9,7 @@ export HamiltonianFunctionWrapper, ErrorHamiltonianFunctionWrapper, UnitaryFunct
 # Export main functions
 export calculate_unitary_and_derivatives, calculate_fidelity_and_derivatives, optimize_fidelity_and_error_sources
 export calculate_interaction_error_operators, calculate_fidelity_response, calculate_fidelity_response_fft, calculate_expectation_values
+export calculate_fidelity_hessian, calculate_principal_parameters
 
 
 # Export regularization
@@ -18,6 +19,7 @@ include("Types.jl")
 include("UnitaryCalculations.jl")
 include("FidelityCalculations.jl")
 include("Regularization.jl")
+include("HessianAnalysis.jl")
 
 module RydbergTools
     include("RydbergTools.jl")

@@ -617,4 +617,111 @@ end
         println("Intensity error sensitivity: $(F_d2err[1]), Response function: $(response_fct[1,1])")
         println("Frequency error sensitivity: $(F_d2err[2]), Response function: $(response_fct[1,2])")
     end
+
+    @testset "Fidelity Hessian validation" begin
+        println("[TEST] Validating analytical Hessian against numerical second derivatives...")
+
+        ntimes = 20
+        t0 = 2*π*1.22
+
+        H0(t, ϕ, x_add) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1], 0, 0)
+        cz(x_add) = cz_with_1q_phase_symmetric(x_add[1])
+
+        rydberg_problem = FidelityRobustGRAPEProblem(
+            unitary_problem=UnitaryRobustGRAPEProblem(
+                t0=t0, ntimes=ntimes, ndim=5,
+                H0=H0, nb_additional_param=1,
+                error_sources=[]
+            ),
+            projector=collect(Diagonal([1,2,1,0,0])),
+            target_unitary=cz
+        )
+
+        Random.seed!(123)
+        xs = 2*π*rand(ntimes + 1)
+
+        H_anal = calculate_fidelity_hessian(rydberg_problem, xs)
+
+        # Test symmetry
+        @test isapprox(H_anal, H_anal', atol=1e-10)
+
+        # Verify selected entries against numerical FD of the fidelity
+        ε_num = 1e-4
+        F0 = calculate_fidelity_and_derivatives(rydberg_problem, xs)[1]
+        nb_checks = 5
+        Random.seed!(456)
+        test_pairs = [(rand(1:ntimes+1), rand(1:ntimes+1)) for _ in 1:nb_checks]
+        push!(test_pairs, (ntimes+1, ntimes+1))  # test the additional parameter
+
+        for (i, j) in test_pairs
+            xs_pp = copy(xs); xs_pp[i] += ε_num; xs_pp[j] += ε_num
+            xs_pm = copy(xs); xs_pm[i] += ε_num; xs_pm[j] -= ε_num
+            xs_mp = copy(xs); xs_mp[i] -= ε_num; xs_mp[j] += ε_num
+            xs_mm = copy(xs); xs_mm[i] -= ε_num; xs_mm[j] -= ε_num
+
+            Fpp = calculate_fidelity_and_derivatives(rydberg_problem, xs_pp)[1]
+            Fpm = calculate_fidelity_and_derivatives(rydberg_problem, xs_pm)[1]
+            Fmp = calculate_fidelity_and_derivatives(rydberg_problem, xs_mp)[1]
+            Fmm = calculate_fidelity_and_derivatives(rydberg_problem, xs_mm)[1]
+
+            d2F_num = (Fpp - Fpm - Fmp + Fmm) / (4 * ε_num^2)
+            H_num_ij = -d2F_num
+
+            @test isapprox(H_anal[i, j], H_num_ij, rtol=1e-2, atol=1e-6)
+        end
+        println("  Hessian entries validated against numerical FD")
+    end
+
+    @testset "Principal parameters at optimum" begin
+        println("[TEST] Computing principal parameters at a CZ optimum...")
+
+        ntimes = 50
+        t0 = 2*π*1.22
+
+        H0(t, ϕ, x_add) = rydberg_hamiltonian_symmetric_blockaded(ϕ[1], 0, 0)
+        cz(x_add) = cz_with_1q_phase_symmetric(x_add[1])
+
+        rydberg_problem = FidelityRobustGRAPEProblem(
+            unitary_problem=UnitaryRobustGRAPEProblem(
+                t0=t0, ntimes=ntimes, ndim=5,
+                H0=H0, nb_additional_param=1,
+                error_sources=[]
+            ),
+            projector=collect(Diagonal([1,2,1,0,0])),
+            target_unitary=cz
+        )
+
+        Random.seed!(42)
+        initial_x = [(2*π*0.001) .* rand(Float64, ntimes); 2*π*rand()]
+
+        optimization_params = FidelityRobustGRAPEParameters(
+            x_initial = initial_x,
+            regularization_functions = [regularization_cost_phase],
+            regularization_coeff1 = [1e-6],
+            regularization_coeff2 = [1e-6],
+            error_source_coeff = Vector{Real}(),
+            iterations = 100,
+            solver_algorithm = LBFGS(),
+            additional_parameters = Dict(:show_trace => false)
+        )
+
+        res = optimize_fidelity_and_error_sources(rydberg_problem, optimization_params)
+        x_opt = Optim.minimizer(res)
+        F_opt = calculate_fidelity_and_derivatives(rydberg_problem, x_opt)[1]
+        println("  Optimized fidelity: $F_opt")
+
+        result = calculate_principal_parameters(rydberg_problem, x_opt; n_eigenvalues=10)
+
+        # At an optimum, eigenvalues should be non-negative
+        @test all(result.eigenvalues .> -1e-6)
+
+        # Should have a few dominant eigenvalues
+        @test length(result.eigenvalues) == 10
+
+        # Eigenvectors should be orthonormal
+        VtV = result.eigenvectors' * result.eigenvectors
+        @test isapprox(VtV, I(10), atol=1e-10)
+
+        println("  Top eigenvalues: $(round.(result.eigenvalues[1:min(5,end)]; digits=4))")
+    end
 end
