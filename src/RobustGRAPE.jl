@@ -20,6 +20,7 @@ include("UnitaryCalculations.jl")
 include("FidelityCalculations.jl")
 include("Regularization.jl")
 include("HessianAnalysis.jl")
+include("HessianWaveforms.jl")
 
 module RydbergTools
     include("RydbergTools.jl")

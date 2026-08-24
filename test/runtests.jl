@@ -724,4 +724,6 @@ end
 
         println("  Top eigenvalues: $(round.(result.eigenvalues[1:min(5,end)]; digits=4))")
     end
+
+    include("test_hessian_waveforms.jl")
 end
