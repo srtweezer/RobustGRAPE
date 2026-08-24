@@ -129,7 +129,41 @@ function rydberg_hamiltonian_full(ϕ::Real,Ω1::Real,Ω2::Real,δ1::Real,δ2::Re
     ]
 end
 
-"""    
+"""
+    rydberg_qubit_hamiltonian_full_blockaded(ϕ_R, ϕ_q, Ω_q, ϵ, δ, B)
+
+Constructs the Hamiltonian for a two-atom Rydberg system with both Rydberg drive (|1⟩↔|r⟩)
+and qubit drive (|0⟩↔|1⟩) in the full 9-state basis.
+
+# Basis
+`|00⟩, |01⟩, |10⟩, |11⟩, |0r⟩, |r0⟩, |1r⟩, |r1⟩, |rr⟩`
+
+# Parameters
+- `ϕ_R::Real`: Phase of the Rydberg drive
+- `ϕ_q::Real`: Phase of the qubit drive
+- `Ω_q::Real`: Rabi frequency of the qubit drive (global, same on both atoms)
+- `ϵ::Real`: Relative intensity error on the Rydberg drive (Ω_R = 1+ϵ)
+- `δ::Real`: Detuning of the Rydberg state
+- `B::Real`: Rydberg-Rydberg blockade shift
+"""
+function rydberg_qubit_hamiltonian_full_blockaded(ϕ_R::Real, ϕ_q::Real, Ω_q::Real, ϵ::Real, δ::Real, B::Real)
+    # Rydberg drive: |1⟩↔|r⟩ with Ω = 1+ϵ on both atoms
+    H = rydberg_hamiltonian_full(ϕ_R, 1+ϵ, 1+ϵ, δ, δ, B)
+    # Qubit drive: |0⟩↔|1⟩, global on both atoms
+    eq = exp(-im*ϕ_q) * Ω_q / 2
+    eqc = conj(eq)
+    # Atom 1 qubit drive: |0⟩₁↔|1⟩₁
+    H[1,3] += eq;  H[3,1] += eqc   # |00⟩↔|10⟩
+    H[2,4] += eq;  H[4,2] += eqc   # |01⟩↔|11⟩
+    H[5,7] += eq;  H[7,5] += eqc   # |0r⟩↔|1r⟩
+    # Atom 2 qubit drive: |0⟩₂↔|1⟩₂
+    H[1,2] += eq;  H[2,1] += eqc   # |00⟩↔|01⟩
+    H[3,4] += eq;  H[4,3] += eqc   # |10⟩↔|11⟩
+    H[6,8] += eq;  H[8,6] += eqc   # |r0⟩↔|r1⟩
+    return H
+end
+
+"""
     cz_with_1q_phase_symmetric(θ::Real)
 
 Constructs the CZ gate with additional single-qubit phase in the symmetric subspace.
@@ -234,6 +268,7 @@ end
 export rydberg_hamiltonian_symmetric_blockaded
 export rydberg_hamiltonian_full_blockaded
 export rydberg_hamiltonian_full
+export rydberg_qubit_hamiltonian_full_blockaded
 export cz_with_1q_phase_symmetric
 export cz_with_1q_phase_full
 export unwrap_phase

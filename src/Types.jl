@@ -17,6 +17,67 @@ const RegularizationFunctionWrapper = FunctionWrapper{Tuple{Real, Vector{<:Real}
 const UnitaryFunctionWrapper = FunctionWrapper{Matrix{<:Complex{<:Real}}, Tuple{Vector{<:Real}}}
 
 """
+    HamiltonianFunctionWrapper
+
+Callable wrapper for Hamiltonian functions.
+Signature: `(time_step::Int, x::AbstractVector{<:Real}, x_add::AbstractVector{<:Real}) -> Matrix`
+"""
+struct HamiltonianFunctionWrapper <: Function
+    f::Function
+end
+(w::HamiltonianFunctionWrapper)(args...) = w.f(args...)
+
+"""
+    ErrorHamiltonianFunctionWrapper
+
+Callable wrapper for error Hamiltonian functions.
+Signature: `(time_step::Int, x::AbstractVector{<:Real}, x_add::AbstractVector{<:Real}, err::Real) -> Matrix`
+"""
+struct ErrorHamiltonianFunctionWrapper <: Function
+    f::Function
+end
+(w::ErrorHamiltonianFunctionWrapper)(args...) = w.f(args...)
+
+"""
+    UnitaryFunctionWrapper
+
+Callable wrapper for target unitary functions.
+Signature: `(x_add::AbstractVector{<:Real}) -> Matrix`
+"""
+struct UnitaryFunctionWrapper <: Function
+    f::Function
+end
+(w::UnitaryFunctionWrapper)(args...) = w.f(args...)
+
+"""
+    RegularizationFunctionWrapper
+
+Callable wrapper for regularization functions.
+Signature: `(x::AbstractVector{<:Real}) -> (r1, j1, r2, j2)`
+"""
+struct RegularizationFunctionWrapper <: Function
+    f::Function
+end
+(w::RegularizationFunctionWrapper)(args...) = w.f(args...)
+
+# Bare closures auto-wrap.
+#
+# The problem structs declare their function fields at the WRAPPER types, which is what
+# makes the call sites concretely typed. Julia will only coerce a plain closure into one of
+# them if a `convert` method exists -- a constructor is not enough -- so without these,
+# every existing call site that passes `H0(t, x, xa) = ...` directly fails with
+# "Cannot convert an object of type #H0#... to an object of type HamiltonianFunctionWrapper",
+# at construction time and with no hint that a wrapper was wanted.
+#
+# `convert(::Type{T}, ::T)` in Base is more specific, so an already-wrapped argument still
+# passes through untouched, and `Vector{Function} -> Vector{RegularizationFunctionWrapper}`
+# converts elementwise through the same methods.
+Base.convert(::Type{HamiltonianFunctionWrapper}, f::Function) = HamiltonianFunctionWrapper(f)
+Base.convert(::Type{ErrorHamiltonianFunctionWrapper}, f::Function) = ErrorHamiltonianFunctionWrapper(f)
+Base.convert(::Type{UnitaryFunctionWrapper}, f::Function) = UnitaryFunctionWrapper(f)
+Base.convert(::Type{RegularizationFunctionWrapper}, f::Function) = RegularizationFunctionWrapper(f)
+
+"""
     ErrorSource
 
 Represents a source of error in the Hamiltonian.

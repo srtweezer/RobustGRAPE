@@ -50,64 +50,82 @@ function calculate_fidelity_and_derivatives(fidelity_problem::FidelityRobustGRAP
     P[P .!= 0] .= 1
     D = real(tr(P0))
 
-    F = (real(tr_mod(P * U0' * U * P * U' * U0)) + abs(tr_mod(P * U0' * U))^2)/(D*(D+1))
+    # Fix 6: Pre-compute common matrix products
+    PU0d = P * U0'
+    PUdU0 = P * U' * U0
+    tr_PU0dU = tr_mod(PU0d * U)
+
+    F = (real(tr_mod(PU0d * U * PUdU0)) + abs(tr_PU0dU)^2)/(D*(D+1))
 
     for nt=1:ntimes
         for np=1:nparam
+            Udx = U_dx[:,:,np,nt]
             F_dx[np,nt] = (
                 real(tr_mod(
-                    P * U0' * U_dx[:,:,np,nt] * P * U' * U0
-                    + P * U0' * U * P * (U_dx[:,:,np,nt])' * U0
-                )) + 2*real(conj(tr_mod(P * U0' * U)) * tr_mod(P * U0' * U_dx[:,:,np,nt]))
+                    PU0d * Udx * PUdU0
+                    + PU0d * U * P * Udx' * U0
+                )) + 2*real(conj(tr_PU0dU) * tr_mod(PU0d * Udx))
             )/(D*(D+1))
         end
     end
-    
+
     for npa=1:nb_additional_param
+        Udxa = U_dx_add[:,:,npa]
+        U0dxa = U0_dx_add[:,:,npa]
         F_dx_add[npa] = (
             real(tr_mod(
-                P * U0' * U_dx_add[:,:,npa] * P * U' * U0
-                + P * U0' * U * P * (U_dx_add[:,:,npa])' * U0
-                + P * (U0_dx_add[:,:,npa])' * U * P * U' * U0
-                + P * U0' * U * P * U' * U0_dx_add[:,:,npa]
-            )) + 2*real(conj(tr_mod(P * U0' * U)) * tr_mod(P * U0' * U_dx_add[:,:,npa] + P * (U0_dx_add[:,:,npa])' * U))
+                PU0d * Udxa * PUdU0
+                + PU0d * U * P * Udxa' * U0
+                + P * U0dxa' * U * PUdU0
+                + PU0d * U * P * U' * U0dxa
+            )) + 2*real(conj(tr_PU0dU) * tr_mod(PU0d * Udxa + P * U0dxa' * U))
         )/(D*(D+1))
     end
-    
+
     for ne=1:nerr
+        Ude = U_derr[:,:,ne]
+        PU0d_Ude = PU0d * Ude
+        P_Ude_d = P * Ude'
+        tr_PU0d_Ude = tr_mod(PU0d_Ude)
+        Ude_d_U0 = Ude' * U0
+
         F_d2err[ne] = 2*(
-            real(tr_mod(P * U0' * U_derr[:,:,ne] * P * (U_derr[:,:,ne])' * U0 - P * (U_derr[:,:,ne])' * U_derr[:,:,ne]))
-            + abs(tr_mod(P * U0' * U_derr[:,:,ne]))^2
-            -D*real(tr_mod(P * (U_derr[:,:,ne])' * U_derr[:,:,ne]))
+            real(tr_mod(PU0d_Ude * P_Ude_d * U0 - P_Ude_d * Ude))
+            + abs(tr_PU0d_Ude)^2
+            -D*real(tr_mod(P_Ude_d * Ude))
         )/(D*(D+1))
-        
+
         for nt=1:ntimes
             for np=1:nparam
+                Uddx = U_derr_dx[:,:,np,nt,ne]
+                P_Uddx_d = P * Uddx'
                 F_d2err_dx[np,nt,ne] = 2*(
                     real(tr_mod(
-                        P * U0' * U_derr_dx[:,:,np,nt,ne] * P * (U_derr[:,:,ne])' * U0
-                        + P * U0' * U_derr[:,:,ne] * P * (U_derr_dx[:,:,np,nt,ne])' * U0
-                        - P * (U_derr_dx[:,:,np,nt,ne])' * U_derr[:,:,ne]
-                        - P * (U_derr[:,:,ne])' * U_derr_dx[:,:,np,nt,ne]
-                    )) + 2*real(conj(tr_mod(P * U0' * U_derr[:,:,ne])) * tr_mod(P * U0' * U_derr_dx[:,:,np,nt,ne]))
-                    - D*real(tr_mod(P * (U_derr_dx[:,:,np,nt,ne])' * U_derr[:,:,ne] + P * (U_derr[:,:,ne])' * U_derr_dx[:,:,np,nt,ne]))
+                        PU0d * Uddx * P * Ude_d_U0
+                        + PU0d_Ude * P * Uddx' * U0
+                        - P_Uddx_d * Ude
+                        - P_Ude_d * Uddx
+                    )) + 2*real(conj(tr_PU0d_Ude) * tr_mod(PU0d * Uddx))
+                    - D*real(tr_mod(P_Uddx_d * Ude + P_Ude_d * Uddx))
                 )/(D*(D+1))
             end
         end
-        
+
         for npa=1:nb_additional_param
+            Uddxa = U_derr_dx_add[:,:,npa,ne]
+            U0dxa = U0_dx_add[:,:,npa]
+            P_Uddxa_d = P * Uddxa'
             F_d2err_dx_add[npa,ne] = 2*(
                 real(tr_mod(
-                    P * (U0_dx_add[:,:,npa])' * U_derr[:,:,ne] * P * (U_derr[:,:,ne])' * U0
-                    + P * U0' * U_derr_dx_add[:,:,npa,ne] * P * (U_derr[:,:,ne])' * U0
-                    + P * U0' * U_derr[:,:,ne] * P * (U_derr_dx_add[:,:,npa,ne])' * U0
-                    + P * U0' * U_derr[:,:,ne] * P * (U_derr[:,:,ne])' * U0_dx_add[:,:,npa]
-                    - P * (U_derr_dx_add[:,:,npa,ne])' * U_derr[:,:,ne]
-                    - P * (U_derr[:,:,ne])' * U_derr_dx_add[:,:,npa,ne]
-                )) + 2*real(conj(tr_mod(P * U0' * U_derr[:,:,ne])) *
-                    tr_mod(P * (U0_dx_add[:,:,npa])' * U_derr[:,:,ne] + P * U0' * U_derr_dx_add[:,:,npa,ne]))
-                - D*real(tr_mod(P * (U_derr_dx_add[:,:,npa,ne])' * U_derr[:,:,ne]
-                    + P * (U_derr[:,:,ne])' * U_derr_dx_add[:,:,npa,ne]))
+                    P * U0dxa' * Ude * P * Ude_d_U0
+                    + PU0d * Uddxa * P * Ude_d_U0
+                    + PU0d_Ude * P * Uddxa' * U0
+                    + PU0d_Ude * P * Ude' * U0dxa
+                    - P_Uddxa_d * Ude
+                    - P_Ude_d * Uddxa
+                )) + 2*real(conj(tr_PU0d_Ude) *
+                    tr_mod(P * U0dxa' * Ude + PU0d * Uddxa))
+                - D*real(tr_mod(P_Uddxa_d * Ude + P_Ude_d * Uddxa))
             )/(D*(D+1))
         end
     end
@@ -191,7 +209,7 @@ function optimize_fidelity_and_error_sources(fidelity_problem::FidelityRobustGRA
                 reg_costs_grad[np,:] = fidelity_parameters.regularization_coeff1[np]*j1+fidelity_parameters.regularization_coeff2[np]*j2
             end
             buffer[1] += sum(reg_costs_tot)
-            buffer[2:end-nb_additional_param] += reshape(reg_costs_grad,nparam*ntimes)
+            buffer[2:end-nb_additional_param] .+= vec(reg_costs_grad)
         end
     end
     

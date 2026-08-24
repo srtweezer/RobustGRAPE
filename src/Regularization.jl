@@ -23,7 +23,7 @@ x = [0.0, 0.1, 0.3, 0.2, 0.1]
 reg1, jac1, reg2, jac2 = regularization_cost(x)
 ```
 """
-function regularization_cost(x::Vector{<:Real})
+function regularization_cost(x::AbstractVector{<:Real})
     n = size(x,1)
     diff_x = diff(x)
 
@@ -75,7 +75,7 @@ df(x) = cos(x)
 reg1, jac1, reg2, jac2 = regularization_cost(x, f, df)
 ```
 """
-function regularization_cost(x::Vector{<:Real}, f::Function, df::Function)
+function regularization_cost(x::AbstractVector{<:Real}, f::Function, df::Function)
     f_x = f.(x)
     reg1, jac1, reg2, jac2 = regularization_cost(f_x)
     df_x = df.(x)
@@ -108,7 +108,7 @@ A tuple with four elements:
 reg1, jac1, reg2, jac2 = regularization_cost_phase(ϕs)
 ```
 """
-function regularization_cost_phase(ϕs::Vector{<:Real})
+function regularization_cost_phase(ϕs::AbstractVector{<:Real})
     reg1_cos, jac1_cos, reg2_cos, jac2_cos = regularization_cost(ϕs, x-> cos(x), x-> -sin(x))
     reg1_sin, jac1_sin, reg2_sin, jac2_sin = regularization_cost(ϕs, x-> sin(x), x-> cos(x))
     return reg1_cos+reg1_sin,jac1_cos+jac1_sin,reg2_cos+reg2_sin,jac2_cos+jac2_sin
