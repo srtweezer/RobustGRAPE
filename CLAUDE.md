@@ -1,61 +1,69 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code (claude.ai/code) working in this repository.
 
 ## Package Overview
-RobustGRAPE.jl is a Julia package for quantum optimal control with error robustness analysis and optimization. It focuses on designing high-fidelity quantum gates that are robust against noise and experimental imperfections using the GRAPE (GRadient Ascent Pulse Engineering) algorithm.
 
-Key features:
-- Optimizes quantum gate pulse sequences using GRAPE algorithm
-- Analyzes and optimizes robustness against various error sources
-- Calculates fidelity response functions to characterize sensitivity to noise
-- Provides tools specifically for Rydberg atom-based quantum gates
+RobustGRAPE.jl is a Julia package for quantum optimal control with error robustness
+analysis and optimization. It designs high-fidelity quantum gates that are robust against
+noise and experimental imperfections, using GRAPE (GRadient Ascent Pulse Engineering).
 
-## Important Interface Changes
-- **Hamiltonian and error functions now use `time_step::Int` instead of `time::Real`**
-- **All functions are now wrapped with `FunctionWrappers.jl` for improved performance**
-- Function signatures are:
-  - `H0(time_step::Int, x::Vector{<:Real}, x_add::Vector{<:Real})`
-  - `Herror(time_step::Int, x::Vector{<:Real}, x_add::Vector{<:Real}, err::Real)`
+- Optimizes pulse sequences with GRAPE
+- Analyzes and optimizes robustness against error sources
+- Computes fidelity response functions to characterize noise sensitivity
+- Provides fidelity and robustness Hessians, and their principal control directions
+- Ships Rydberg-specific Hamiltonians and CZ targets
 
-## Function Wrapper Types
-The package now uses the following function wrapper types for better performance:
-- `HamiltonianFunctionWrapper`: For Hamiltonian functions - `H0(time_step, x, x_add)`
-- `ErrorHamiltonianFunctionWrapper`: For error Hamiltonian functions - `Herror(time_step, x, x_add, err)`
-- `RegularizationFunctionWrapper`: For regularization functions
-- `UnitaryFunctionWrapper`: For target unitary functions - `target_unitary(x_add)`
+## Interface
 
-Use wrapped versions of provided functions for best performance:
-- `regularization_cost_wrapped` instead of `regularization_cost`
-- `regularization_cost_phase_wrapped` instead of `regularization_cost_phase`
+Hamiltonians and error Hamiltonians take a **discrete `time_step::Int`** between 1 and
+`ntimes`, not a continuous time:
+
+```julia
+H0(time_step::Int, x::Vector{<:Real}, x_add::Vector{<:Real})
+Herror(time_step::Int, x::Vector{<:Real}, x_add::Vector{<:Real}, err::Real)
+```
+
+They are passed as FunctionWrappers.jl wrappers, which keeps the inner propagation loop
+type-stable: `HamiltonianFunctionWrapper`, `ErrorHamiltonianFunctionWrapper`,
+`UnitaryFunctionWrapper`, `RegularizationFunctionWrapper`. Use the wrapped regularizers
+(`regularization_cost_wrapped`, `regularization_cost_phase_wrapped`) rather than the bare
+ones.
 
 ## Core Types
-- `ErrorSource`: Represents a source of error in the Hamiltonian
-- `UnitaryRobustGRAPEProblem`: Defines the quantum control problem parameters
-- `FidelityRobustGRAPEProblem`: Adds target unitary and projector to calculate fidelity
-- `FidelityRobustGRAPEParameters`: Configuration for optimization (regularization, error coefficients, etc.)
 
-## Core Functions 
-- `calculate_unitary_and_derivatives`: Computes the evolution operator and its derivatives
-- `calculate_fidelity_and_derivatives`: Computes fidelity and sensitivity to errors
-- `optimize_fidelity_and_error_sources`: High-level optimization interface
-- `calculate_fidelity_response_fft`: Computes the fidelity response function to noise
+- `ErrorSource` — a source of error in the Hamiltonian
+- `UnitaryRobustGRAPEProblem` — the control problem
+- `FidelityRobustGRAPEProblem` — adds a target unitary and a projector
+- `FidelityRobustGRAPEParameters` — optimization configuration
+
+## Core Functions
+
+- `calculate_unitary_and_derivatives` — evolution operator and its derivatives
+- `calculate_fidelity_and_derivatives` — fidelity and error sensitivities
+- `optimize_fidelity_and_error_sources` — high-level optimization
+- `calculate_fidelity_response_fft` — fidelity response function to a noise PSD
+- `calculate_fidelity_hessian`, `calculate_robustness_hessian`, `principal_waveforms` —
+  low-rank structure of the landscape, for closed-loop calibration
 
 ## Examples
-The package includes two key examples:
-- Time-optimal CZ gate (`examples/time_optimal_cz.jl`)
-- Amplitude-robust CZ gate (`examples/ar_cz.jl`)
 
-## Build/Test Commands
-- Run all tests: `julia --project=. -e "using Pkg; Pkg.test()"`
-- Run single test: `julia --project=. -e "using Pkg; Pkg.test(\"RobustGRAPE\", test_args=[\"path/to/test.jl\"])"`
+- Time-optimal CZ gate: `examples/time_optimal_cz.jl`
+- Amplitude-robust CZ gate: `examples/ar_cz.jl`
 
-## Code Style Guidelines
-- Use 4-space indentation
-- Import order: Julia standard libraries first, then external packages, then internal modules
-- Type annotations should be used for function arguments and struct fields when helpful
-- Use docstrings with Parameters section for public functions and types
-- Error handling: use descriptive error messages
-- Follow Julia naming conventions: snake_case for functions and variables, CamelCase for types
-- Export explicit symbols rather than `export *` patterns
-- Parameters.jl `@with_kw` is used selectively, not required for all structs
+## Build and test
+
+```bash
+julia --project=. -e "using Pkg; Pkg.test()"
+julia --project=docs docs/make.jl        # docs; deployed from `stable` only
+```
+
+## Code style
+
+- 4-space indentation
+- Imports: Julia standard libraries, then external packages, then internal modules
+- Type annotations on function arguments and struct fields where they help
+- Docstrings with a Parameters section for public functions and types
+- snake_case for functions and variables, CamelCase for types
+- Export explicit symbols
+- Descriptive error messages

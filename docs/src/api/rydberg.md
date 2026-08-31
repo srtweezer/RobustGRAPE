@@ -14,6 +14,7 @@ This page documents functions specific to Rydberg atom systems in RobustGRAPE.jl
 rydberg_hamiltonian_symmetric_blockaded
 rydberg_hamiltonian_full_blockaded
 rydberg_hamiltonian_full
+rydberg_qubit_hamiltonian_full_blockaded
 ```
 
 ### Gate Functions

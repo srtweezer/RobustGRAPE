@@ -37,6 +37,10 @@ At a lower level, the fidelity tools rely on the ability to efficiently compute 
 
 Provides simple functionalities to regularize control parameters and their derivatives. Regularization can promote convergence to smooth high-fidelity pulses.
 
+### Hessian analysis
+
+Near an optimum the fidelity landscape is low rank, so a closed-loop calibration only has to search the handful of control directions the fidelity actually responds to. The package computes the fidelity Hessian and its principal directions, and — for gates designed to be robust — the *robustness* Hessian, whose leading directions are the ones a calibration must avoid if it is not to spend the robustness the gate paid for. Nuisance parameters (free single-qubit phases, gauge and target-family angles) are eliminated by Schur complement rather than diagonalized alongside the physical controls.
+
 ### Rydberg tools
 
 Provides pre-defined Hamiltonian and parametrized CZ gates for a two-atom Rydberg system.

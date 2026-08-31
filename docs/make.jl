@@ -33,6 +33,7 @@ makeinfo = (
             "Unitary Calculations" => "api/unitary.md",
             "Fidelity Calculations" => "api/fidelity.md",
             "Regularization" => "api/regularization.md",
+            "Hessian Analysis" => "api/hessian.md",
             "Rydberg Tools" => "api/rydberg.md",
         ],
     ],

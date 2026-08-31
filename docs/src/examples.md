@@ -193,7 +193,7 @@ H(t) = H_0(t) + H_1(t, \epsilon_1) + \cdots + H_{n_e}(t, \epsilon_{n_e})
 
 where ``H_i(0) = 0``, and ``H_i(\epsilon_i)`` represents the additional Hamiltonian due to some error ``\epsilon_i``. One may also define a _noise operator_ ``O_i = \frac{\partial H_i}{\partial \epsilon_i} (0)``.
 
-These Hamiltonians ``H_i`` can be used to define an error source `ErrorSource(Herr)` with `Herr(t,x,x_add,eps) = some matrix`. Here we first consider two types of error: amplitude errors on the laser drive (parametrized by ``\epsilon``) and angular frequency errors between the ground state manifold and the Rydberg manifold (parametrized by ``\delta``). Note that, because we consider a symmetric system, these errors apply to both atoms at the same time. Hence, the frequency errors cannot represent uncorrelated errors due to, e.g., Doppler-induced dephasing.
+These Hamiltonians ``H_i`` can be used to define an error source `ErrorSource(Herr)` with `Herr(time_step,x,x_add,eps) = some matrix`. Here we first consider two types of error: amplitude errors on the laser drive (parametrized by ``\epsilon``) and angular frequency errors between the ground state manifold and the Rydberg manifold (parametrized by ``\delta``). Note that, because we consider a symmetric system, these errors apply to both atoms at the same time. Hence, the frequency errors cannot represent uncorrelated errors due to, e.g., Doppler-induced dephasing.
 
 Let's define these Hamiltonians and we alter our `FidelityRobustGRAPEProblem` to include these error sources.
 
